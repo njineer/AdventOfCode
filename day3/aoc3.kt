@@ -14,10 +14,12 @@ fun aoc3(n: Int): Int? {
             }
 
             // corner values of this layer
-            val distanceFromCenterOfSide = (0..3).map { lowerRight - (sideLength-1)*it - (sideLength/2)} // center value of each side
-                                                 .map { abs(n - it) }                                    // distance of n from each side's center value
-                                                 .min()!!                                                // min distance (only null if n == 1)
+            val distanceFromCenterOfSide = (0..3).map { lowerRight - (sideLength-1)*it - (sideLength/2) } // center value of each side
+                                                 .map { abs(n - it) }                                     // distance of n from each side's center value
+                                                 .min()!!                                                 // min distance (only null if n == 1)
 
+            // Any number in this square is sideLength/2 away from [1] in X or Y direction.
+            // In the other X or Y direction, use n's distance from the center of n's side of this square.
             sideLength/2 + distanceFromCenterOfSide
         }
     }
