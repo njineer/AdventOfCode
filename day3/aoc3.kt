@@ -25,6 +25,30 @@ fun aoc3(n: Int): Int? {
     }
 }
 
+class Coord (val x: Int, val y: Int) {
+    fun plus(other: Coord): Coord = Coord(x + other.x, y + other.y)
+}
+
+fun aoc3_part2(n: Int): Int? {
+    return when {
+        n <= 0 -> null
+        n == 1 -> 0
+        else -> {
+           var spiral = mutableMapOf(Pair(0,0) to 1) 
+           /*
+            x = y = 1
+            right until x
+            up until y
+            left until -x
+            down until -y
+            right until x + 1
+            ...
+           */
+           0
+        }
+    }
+}
+
 fun main(args: Array<String>) {
     if (args.isNotEmpty()) {
         val n = args[0].toInt()
