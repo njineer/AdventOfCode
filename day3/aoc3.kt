@@ -28,12 +28,7 @@ fun aoc3(n: Int): Int? {
 data class Coord (val x: Int, val y: Int)
 operator fun Coord.plus(other: Coord): Coord = Coord(x + other.x, y + other.y)
 
-//fun MutableMap<Coord, Int>.get(x: Int, y: Int): Int = getOrDefault(Coord(x,y), 0)
-fun MutableMap<Coord, Int>.get(x: Int, y: Int): Int {
-    val result = getOrDefault(Coord(x,y), 0)
-    println("\tgetOr0: ($x, $y) = $result")
-    return result
-}
+fun MutableMap<Coord, Int>.get(x: Int, y: Int): Int = getOrDefault(Coord(x,y), 0)
 
 enum class Direction { RIGHT, UP, LEFT, DOWN }
 
@@ -41,8 +36,6 @@ fun aoc3_part2(n: Int): Int? {
     var result: Int?
     if (n <= 0) {
         result = null
-    } else if (n == 1) {
-        result = 2
     } else {
         var spiral = mutableMapOf(Coord(0,0) to 1) 
         var cur = 1 // (0,0)
@@ -52,8 +45,8 @@ fun aoc3_part2(n: Int): Int? {
         var y_max = y + 1
         var dir = Direction.RIGHT
 
-        while (cur < n) {
-            println("--- cur($cur), x($x), y($y), x_max($x_max), y_max($y_max)")
+        while (cur <= n) {
+            //println("[cur($cur), x($x), y($y), x_max($x_max), y_max($y_max)]")
 
             when (dir) {
                 Direction.RIGHT -> {
@@ -102,9 +95,9 @@ fun aoc3_part2(n: Int): Int? {
              .sum()
             
             spiral.put(Coord(x,y), cur)
-            println("{new: ($x, $y) = $cur}")
+            //println("{new: ($x, $y) = $cur}")
 
-            println("$dir -> ${Coord(x,y)}, cur=$cur")
+            //println("$dir -> ${Coord(x,y)}, cur=$cur")
         }
         result = cur
     }
