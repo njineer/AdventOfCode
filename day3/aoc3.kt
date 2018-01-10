@@ -36,67 +36,69 @@ fun MutableMap<Coord, Int>.get(x: Int, y: Int): Int {
 }
 
 fun aoc3_part2(n: Int): Int? {
-    return when {
-        n <= 0 -> null
-        n == 1 -> 2
-        else -> {
-            var spiral = mutableMapOf(Coord(0,0) to 1) 
-            var cur = 1 // (0,0)
-            var x = 0
-            var y = 0
-            var x_max = x + 1
-            var y_max = y + 1
+    var result: Int?
+    if (n <= 0) {
+        result = null
+    } else if (n == 1) {
+        result = 2
+    } else {
+        var spiral = mutableMapOf(Coord(0,0) to 1) 
+        var cur = 1 // (0,0)
+        var x = 0
+        var y = 0
+        var x_max = x + 1
+        var y_max = y + 1
 
-            while (cur < n) {
-                println("--- cur($cur), x($x), y($y), x_max($x_max), y_max($y_max)")
-                // right
-                while (x++ < x_max) {
-                    val tmp = arrayOf(Coord(0,1), Coord(-1,1), Coord(-1,0), Coord(1,1)).map { it + Coord(x,y) } 
-                                                                                       .map { (x,y) -> spiral.get(x,y) }
-                    cur = tmp.sum()
-                    spiral.put(Coord(x,y), cur)
-                    println("{new: ($x, $y) = $cur}")
-                    println("R-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
-                }
-                --x
-                // up
-                while (y++ < y_max) {
-                    val tmp = arrayOf(Coord(-1,-1), Coord(-1,0), Coord(-1,1), Coord(0,-1)).map { it + Coord(x,y) } 
-                                                                                          .map { (x,y) -> spiral.get(x,y) }
-                    cur = tmp.sum()
-                    spiral.put(Coord(x,y), cur)
-                    println("{new: ($x, $y) = $cur}")
-                    println("U-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
-                }
-                --y
-                // left
-                while (x-- > -x_max) {
-                    val tmp = arrayOf(Coord(-1,-1), Coord(0,-1), Coord(1,-1), Coord(1,0)).map { it + Coord(x,y) } 
-                                                                                         .map { (x,y) -> spiral.get(x,y) }
-                    cur = tmp.sum()
-                    spiral.put(Coord(x,y), cur)
-                    println("{new: ($x, $y) = $cur}")
-                    println("L-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
-                }
-                ++x
-                // down
-                while (y-- > -y_max) {
-                    val tmp = arrayOf(Coord(0,1), Coord(1,-1), Coord(1,0), Coord(1,1)).map { it + Coord(x,y) } 
-                                                                                      .map { (x,y) -> spiral.get(x,y) }
-                    cur = tmp.sum()
-                    spiral.put(Coord(x,y), cur)
-                    println("{new: ($x, $y) = $cur}")
-                    println("D-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
-                }
-                ++y
-                ++x_max
-                ++y_max
-                if (x_max > 20 || y_max > 20)
-                    break
+        while (cur < n) {
+            println("--- cur($cur), x($x), y($y), x_max($x_max), y_max($y_max)")
+            // right
+            while (x++ < x_max) {
+                val tmp = arrayOf(Coord(0,1), Coord(-1,1), Coord(-1,0), Coord(1,1)).map { it + Coord(x,y) } 
+                                                                                   .map { (x,y) -> spiral.get(x,y) }
+                cur = tmp.sum()
+                spiral.put(Coord(x,y), cur)
+                println("{new: ($x, $y) = $cur}")
+                println("R-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
             }
-            cur
+            --x
+            // up
+            while (y++ < y_max) {
+                val tmp = arrayOf(Coord(-1,-1), Coord(-1,0), Coord(-1,1), Coord(0,-1)).map { it + Coord(x,y) } 
+                                                                                      .map { (x,y) -> spiral.get(x,y) }
+                cur = tmp.sum()
+                spiral.put(Coord(x,y), cur)
+                println("{new: ($x, $y) = $cur}")
+                println("U-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
+            }
+            --y
+            // left
+            while (x-- > -x_max) {
+                val tmp = arrayOf(Coord(-1,-1), Coord(0,-1), Coord(1,-1), Coord(1,0)).map { it + Coord(x,y) } 
+                                                                                     .map { (x,y) -> spiral.get(x,y) }
+                cur = tmp.sum()
+                spiral.put(Coord(x,y), cur)
+                println("{new: ($x, $y) = $cur}")
+                println("L-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
+            }
+            ++x
+            // down
+            while (y-- > -y_max) {
+                val tmp = arrayOf(Coord(0,1), Coord(1,-1), Coord(1,0), Coord(1,1)).map { it + Coord(x,y) } 
+                                                                                  .map { (x,y) -> spiral.get(x,y) }
+                cur = tmp.sum()
+                spiral.put(Coord(x,y), cur)
+                println("{new: ($x, $y) = $cur}")
+                println("D-> ${Coord(x,y)}, cur=$tmp, sum=$cur")
+            }
+            ++y
+            ++x_max
+            ++y_max
+            if (x_max > 20 || y_max > 20)
+                break
         }
+        result = cur
     }
+    return result
 }
 
 fun main(args: Array<String>) {
