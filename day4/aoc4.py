@@ -8,8 +8,8 @@ def aoc4(filename):
     with open(filename) as f:
         for line in f:
             if line.strip():
-                passphrases = line.split()
-                if Counter(passphrases).most_common(1)[0][1] == 1:
+                words = line.split()
+                if Counter(words).most_common(1)[0][1] == 1:
                     valid +=1
     return valid
 
