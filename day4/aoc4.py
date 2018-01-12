@@ -8,10 +8,30 @@ def aoc4(filename):
     with open(filename) as f:
         for line in f:
             if line.strip():
-                words = line.split()
+                words = line.strip().split()
                 if Counter(words).most_common(1)[0][1] == 1:
                     valid +=1
     return valid
+
+
+def aoc4_2(filename):
+    valid = 0
+    with open(filename) as f:
+        for line in f:
+            if line.strip():
+                # counters are not hashable, so check for duplicates manually
+                counters = []
+                for word in line.strip().split():
+                    c = Counter(word)
+                    if c in counters:
+                        break
+                    else:
+                        counters.append(c)
+                else:
+                    valid +=1
+    return valid
+
+
 
 
 if __name__ == '__main__':
@@ -21,3 +41,4 @@ if __name__ == '__main__':
         print("Too many arugments.", file=sys.stderr)
     else:
         print(aoc4(sys.argv[1]))
+        print(aoc4_2(sys.argv[1]))
