@@ -22,14 +22,12 @@ func jumpsUntilExit(jumps []int) int {
 func jumpsUntilExit2(jumps []int) int {
     steps := 0
     for offset := 0; offset >= 0 && offset < len(jumps); {
-        //fmt.Printf("Step %v: jumps[%v] = %v -> ", steps, offset, jumps[offset])
         newOffset := offset + jumps[offset]
         if jumps[offset] >= 3 {
             jumps[offset]--
         } else {
             jumps[offset]++
         }
-        //fmt.Printf("jumps[%v] = %v; next = %v\n", offset, jumps[offset], newOffset)
         offset = newOffset
         steps++
     }
@@ -50,7 +48,7 @@ func main() {
     jumps := make([]int, 0)
     for scanner.Scan() {
         if jump, err := strconv.Atoi(strings.TrimSpace(scanner.Text())); err != nil {
-            //fmt.Println("Invalid integer: %v", scanner.Text())
+            fmt.Println("Invalid integer: %v", scanner.Text())
             return
         } else {
             jumps = append(jumps, jump)
