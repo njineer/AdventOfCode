@@ -16,14 +16,6 @@ func printMemory(s []int) {
     fmt.Printf("%v]\n", s[len(s)-1])
 }
 
-func printHistory(m *map[string]struct{}) {
-    fmt.Println("\n{")
-    for k, _ := range *m {
-        fmt.Printf("\t[%v]\n", k)
-    }
-    fmt.Printf("}\n")
-}
-
 func sliceToString(sInt []int) string {
     sStr := make([]string, len(sInt))
     for i, x := range sInt {
@@ -80,9 +72,6 @@ func main() {
     const numBanks = 16
     memory := make([]int, numBanks)
     
-    // history of bank configurations seen
-    history := make(map[string]struct{})
-
     // load initial memory allocation
     scanner.Scan()
     initAlloc := scanner.Text()
@@ -94,6 +83,16 @@ func main() {
         }
     }
 
+    fmt.Println("Advent of Code: Day 6")
+    fmt.Printf("reallocations: %v\n", aoc6(memory))
+    fmt.Printf("cycles: %v\n", aoc6_2(memory))
+}
+
+func aoc6 (memory []int) int {
+    // history of bank configurations seen
+    history := make(map[string]struct{})
+
+
     memoryStr := sliceToString(memory)
     reallocations := 0
 
@@ -104,7 +103,23 @@ func main() {
         _, seen = history[memoryStr]
         reallocations++
     }
+    return reallocations
+}
 
-    fmt.Println("Advent of Code: Day 6")
-    fmt.Printf("reallocations: %v\n", reallocations)
+func aoc6_2 (memory []int) int {
+    // history of bank configurations seen
+    history := make(map[string]int)
+
+
+    memoryStr := sliceToString(memory)
+    reallocations := 0
+
+    for _, seen := history[memoryStr]; !seen; {
+        history[memoryStr] = reallocations
+        reallocate(memory)
+        memoryStr = sliceToString(memory)
+        _, seen = history[memoryStr]
+        reallocations++
+    }
+    return reallocations-history[memoryStr]
 }
