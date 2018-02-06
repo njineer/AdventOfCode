@@ -8,7 +8,7 @@ import (
     "strconv"
 )
 
-func printMemory(s *[16]int) {
+func printMemory(s *[4]int) {
     fmt.Print("[")
     for _, x := range s[:len(s)-1] {
         fmt.Printf("%v,", x)
@@ -16,7 +16,16 @@ func printMemory(s *[16]int) {
     fmt.Printf("%v]\n", s[len(s)-1])
 }
 
-func findMaxIndex(a *[16]int) int {
+func printHistory(m *map[[4]int]struct{}) {
+    fmt.Println("{")
+    for k, _ := range *m {
+        fmt.Print("\t")
+        printMemory(&k)
+    }
+    fmt.Printf("}\n")
+}
+
+func findMaxIndex(a *[4]int) int {
     var maxIndex, maxValue = 0, 0
 
     for i, v := range a {
@@ -25,13 +34,10 @@ func findMaxIndex(a *[16]int) int {
             maxIndex = i
         }
     }
-    fmt.Printf("Max = %v @ %v\n", maxValue, maxIndex)
     return maxIndex
 }
 
-func reallocate(memory *[16]int) {
-    fmt.Print("Before reallocation: ")
-    printMemory(memory)
+func reallocate(memory *[4]int) {
     // find index of max number of blocks
     maxIndex := findMaxIndex(memory)
     // rellocate those blocks
@@ -40,10 +46,8 @@ func reallocate(memory *[16]int) {
     memory[maxIndex] = 0
 
     for i := maxIndex+1; alloc > 0; i, alloc = i+1, alloc-1 {
-        memory[i%16]++
+        memory[i%4]++
     }
-    fmt.Print("After reallocation:  ")
-    printMemory(memory)
 }
 
 func main() {
@@ -66,11 +70,11 @@ func main() {
     }
 
     // memory: fixed number of banks consisting of arbitrary number of blocks
-    const numBanks = 16
+    const numBanks = 4
     var memory [numBanks]int
     
     // history of bank configurations seen
-    history := make(map[[16]int]struct{})
+    history := make(map[[4]int]struct{})
 
     // load initial memory allocation
     scanner.Scan()
@@ -84,10 +88,10 @@ func main() {
     }
 
     reallocations := 0
-    watchdog := 1000
+    watchdog := 10
     for _, seen := history[memory]; !seen && watchdog > 0; {
-        fmt.Printf("Reallocation %v: ", reallocations)
-        printMemory(&memory)
+        fmt.Printf("Reallocation %v: %v", reallocations, seen)
+        printHistory(&history)
         history[memory] = struct{}{}
         reallocate(&memory)
         reallocations++
