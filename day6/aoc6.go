@@ -8,7 +8,7 @@ import (
     "strconv"
 )
 
-func printMemory(s *[4]int) {
+func printMemory(s []int) {
     fmt.Print("[")
     for _, x := range s[:len(s)-1] {
         fmt.Printf("%v,", x)
@@ -16,16 +16,23 @@ func printMemory(s *[4]int) {
     fmt.Printf("%v]\n", s[len(s)-1])
 }
 
-func printHistory(m *map[[4]int]struct{}) {
-    fmt.Println("{")
+func printHistory(m *map[string]struct{}) {
+    fmt.Println("\n{")
     for k, _ := range *m {
-        fmt.Print("\t")
-        printMemory(&k)
+        fmt.Printf("\t[%v]\n", k)
     }
     fmt.Printf("}\n")
 }
 
-func findMaxIndex(a *[4]int) int {
+func sliceToString(sInt []int) string {
+    sStr := make([]string, len(sInt))
+    for i, x := range sInt {
+        sStr[i] = strconv.Itoa(x)
+    }
+    return strings.Join(sStr, ",")
+}
+
+func findMaxIndex(a []int) int {
     var maxIndex, maxValue = 0, 0
 
     for i, v := range a {
@@ -37,7 +44,7 @@ func findMaxIndex(a *[4]int) int {
     return maxIndex
 }
 
-func reallocate(memory *[4]int) {
+func reallocate(memory []int) {
     // find index of max number of blocks
     maxIndex := findMaxIndex(memory)
     // rellocate those blocks
@@ -46,7 +53,7 @@ func reallocate(memory *[4]int) {
     memory[maxIndex] = 0
 
     for i := maxIndex+1; alloc > 0; i, alloc = i+1, alloc-1 {
-        memory[i%4]++
+        memory[i%len(memory)]++
     }
 }
 
@@ -70,11 +77,11 @@ func main() {
     }
 
     // memory: fixed number of banks consisting of arbitrary number of blocks
-    const numBanks = 4
-    var memory [numBanks]int
+    const numBanks = 16
+    memory := make([]int, numBanks)
     
     // history of bank configurations seen
-    history := make(map[[4]int]struct{})
+    history := make(map[string]struct{})
 
     // load initial memory allocation
     scanner.Scan()
@@ -87,15 +94,15 @@ func main() {
         }
     }
 
+    memoryStr := sliceToString(memory)
     reallocations := 0
-    watchdog := 10
-    for _, seen := history[memory]; !seen && watchdog > 0; {
-        fmt.Printf("Reallocation %v: %v", reallocations, seen)
-        printHistory(&history)
-        history[memory] = struct{}{}
-        reallocate(&memory)
+
+    for _, seen := history[memoryStr]; !seen; {
+        history[memoryStr] = struct{}{}
+        reallocate(memory)
+        memoryStr = sliceToString(memory)
+        _, seen = history[memoryStr]
         reallocations++
-        watchdog--
     }
 
     fmt.Println("Advent of Code: Day 6")
