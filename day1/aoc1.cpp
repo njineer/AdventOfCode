@@ -8,11 +8,13 @@ int aoc1 (const string& input) {
     auto itr1 = input.begin();
     auto itr2 = next(itr1, 1);
 
+    // compare each character to the next
     for(; itr2 != input.end(); ++itr1, ++itr2) {
         if (*itr1 == *itr2) {
             sum += *itr1 - '0'; // char to int
         }
     }
+    // check first and last characters
     if (input.front() == input.back())
         sum += input.back() - '0';
 
@@ -23,6 +25,8 @@ int aoc1_2 (const string& input) {
     int sum = 0;
     int inputLength = input.size();
     int step = inputLength/2;
+
+    // compare each item with the one halfway around
     for (int i=0; i < inputLength; ++i) {
         int halfway = (i + step) % inputLength;
         if (input[i] == input[halfway]) {
@@ -37,7 +41,9 @@ int main(int argc, char** argv) {
     string input;
 
     switch (argc) {
+        // get input from stdin
         case 1: getline(cin, input); break;
+        // get input from command line args
         case 2: input = argv[1]; break;
         default: cerr << "Too many arguments." << endl; return 1;
     }

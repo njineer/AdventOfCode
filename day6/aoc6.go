@@ -8,6 +8,7 @@ import (
     "strconv"
 )
 
+// debug - print the memory banks
 func printMemory(s []int) {
     fmt.Print("[")
     for _, x := range s[:len(s)-1] {
@@ -16,6 +17,7 @@ func printMemory(s []int) {
     fmt.Printf("%v]\n", s[len(s)-1])
 }
 
+// join a slice of ints into a comma-separated string
 func sliceToString(sInt []int) string {
     sStr := make([]string, len(sInt))
     for i, x := range sInt {
@@ -24,6 +26,7 @@ func sliceToString(sInt []int) string {
     return strings.Join(sStr, ",")
 }
 
+// find the index of the largest value in a slice of ints
 func findMaxIndex(a []int) int {
     var maxIndex, maxValue = 0, 0
 
@@ -36,17 +39,64 @@ func findMaxIndex(a []int) int {
     return maxIndex
 }
 
+
 func reallocate(memory []int) {
     // find index of max number of blocks
     maxIndex := findMaxIndex(memory)
-    // rellocate those blocks
+    // those block will be reallocated
     alloc := memory[maxIndex]
     // reset previously-max bank
     memory[maxIndex] = 0
 
+    // reallocate blocks
     for i := maxIndex+1; alloc > 0; i, alloc = i+1, alloc-1 {
         memory[i%len(memory)]++
     }
+}
+
+func aoc6 (memory []int) int {
+    // set of bank configurations we have seen
+    history := make(map[string]struct{})
+
+    // stringify the current memory layout
+    memoryStr := sliceToString(memory)
+    reallocations := 0
+
+    for _, seen := history[memoryStr]; !seen; {
+        // add this memory layout to the history
+        history[memoryStr] = struct{}{}
+        // reallocate the largest bank
+        reallocate(memory)
+        // stringify the current memory layout and check if it's new
+        memoryStr = sliceToString(memory)
+        _, seen = history[memoryStr]
+
+        reallocations++
+    }
+    return reallocations
+}
+
+func aoc6_2 (memory []int) int {
+    // history of bank configurations seen
+    history := make(map[string]int)
+
+
+    memoryStr := sliceToString(memory)
+    reallocations := 0
+
+    for _, seen := history[memoryStr]; !seen; {
+        // add this memory layout to the history, along with when it was seen
+        history[memoryStr] = reallocations
+        // reallocate the largest bank
+        reallocate(memory)
+        // stringify the current memory layout and check if it's new
+        memoryStr = sliceToString(memory)
+        _, seen = history[memoryStr]
+
+        reallocations++
+    }
+    // number of reallocations - cycle we first saw this layout
+    return reallocations-history[memoryStr]
 }
 
 func main() {
@@ -88,38 +138,3 @@ func main() {
     fmt.Printf("cycles: %v\n", aoc6_2(memory))
 }
 
-func aoc6 (memory []int) int {
-    // history of bank configurations seen
-    history := make(map[string]struct{})
-
-
-    memoryStr := sliceToString(memory)
-    reallocations := 0
-
-    for _, seen := history[memoryStr]; !seen; {
-        history[memoryStr] = struct{}{}
-        reallocate(memory)
-        memoryStr = sliceToString(memory)
-        _, seen = history[memoryStr]
-        reallocations++
-    }
-    return reallocations
-}
-
-func aoc6_2 (memory []int) int {
-    // history of bank configurations seen
-    history := make(map[string]int)
-
-
-    memoryStr := sliceToString(memory)
-    reallocations := 0
-
-    for _, seen := history[memoryStr]; !seen; {
-        history[memoryStr] = reallocations
-        reallocate(memory)
-        memoryStr = sliceToString(memory)
-        _, seen = history[memoryStr]
-        reallocations++
-    }
-    return reallocations-history[memoryStr]
-}
