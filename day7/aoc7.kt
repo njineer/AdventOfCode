@@ -12,8 +12,8 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     }
 }
 
-data class Program(val name: String, val weight: Int) {
-    constructor (name: String, weight: Int, subs: List<String>): this(name, weight)
+data class Program(val name: String, val weight: Int, var subs: MutableList<String>) {
+    constructor (name: String, weight: Int): this(name, weight, mutableListOf<String>())
 }
 
 fun parseLine(line: String): Program {
@@ -21,15 +21,11 @@ fun parseLine(line: String): Program {
     linePattern.matchEntire(line)?.let { match ->
         match.groupValues.filter { it.isNotEmpty() }.let { groups ->
             return when (groups.size) {
-                3 -> {println("3: $line")
-                Program(match.groupValues[1], 
+                3 -> Program(match.groupValues[1], 
                              match.groupValues[2].toInt())
-                            }
-                7 -> {println("7: $line")
-                    Program(match.groupValues[1], 
-                             match.groupValues[2].toInt(), 
-                             match.groupValues.slice(4..6))
-                    }
+                7 -> Program(match.groupValues[1], 
+                         match.groupValues[2].toInt(), 
+                         match.groupValues.slice(4..6).toMutableList())
                 else -> throw InputException("Expected 3 or 7 regex groups;" +  
                                   "found ${match.groupValues.size} in '$line'")
             }
@@ -42,7 +38,6 @@ fun main(args: Array<String>) {
     val tower = mutableMapOf<String, Program>()
     if (args.isNotEmpty()) {
         val filename = args[0]
-        val linePattern = Regex("(\\w+)\\s+\\((\\d+)\\)\\s*(->\\s+(\\w+),\\s+(\\w+),\\s+(\\w+)\\s*)?")
         File(filename).forEachLine { line ->
             parseLine(line).let {
                 tower.put(it.name, it)
