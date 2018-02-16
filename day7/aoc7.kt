@@ -12,11 +12,28 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     }
 }
 
+data class Program(
+    val name: String, 
+    var weight: Int?, 
+    var parent: String?,
+    var subs: List<String>,
+    var balanced: Boolean?,
+    var fullWeight: Int?
+) 
+{
+    constructor (name: String, weight: Int) : this(name, weight, null, listOf<String>(), null, null)
+    constructor (name: String, weight: Int, subs: List<String>) : this(name, weight, null, subs, null, null)
+
+    // fullWeight property?
+}
+
 class Tower() {
     var parents = mutableMapOf<String, String?>()
-    var weights = mutableMapOf<String, Int?>()
-    var fullWeights = mutableMapOf<String, Int?>()
+    var weights = mutableMapOf<String, Int>()
+    var fullWeights = mutableMapOf<String, Int>()
     var balance = mutableMapOf<String, Boolean>()
+    
+    var base: String? = null
 
     // set or update a program's parent/base
     fun updateParent(name: String, parent: String) = parents.plusAssign(name to parent)
@@ -28,7 +45,7 @@ class Tower() {
     fun updateFullWeight(name: String, weight: Int) = fullWeights.plusAssign(name to weight)
 
     // set or udpate whether a program's disc is balanced
-
+    fun updateBalance(name: String, balanced: Boolean) = balance.plusAssign(name to balanced)
 
     fun parseInput(line: String): Unit {
         // Capture of subprograms is overwritten, so capture all in comma-separated list
@@ -65,6 +82,7 @@ class Tower() {
                 program = it
             }?: break
         }
+        base = program
         return program
     }
 }
@@ -93,6 +111,7 @@ fun main(args: Array<String>) {
             ?: break
         }
     }
-    println("Tower base: ${tower.findBase()}")
+    val base = tower.findBase()
+    println("Tower base: $base")
 }
 
