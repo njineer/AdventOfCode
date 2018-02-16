@@ -12,15 +12,23 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     }
 }
 
-class Tower(var parents: MutableMap<String, String?>, var weights: MutableMap<String, Int?>) {
+class Tower() {
+    var parents = mutableMapOf<String, String?>()
+    var weights = mutableMapOf<String, Int?>()
+    var fullWeights = mutableMapOf<String, Int?>()
+    var balance = mutableMapOf<String, Boolean>()
+
     // set or update a program's parent/base
-    fun updateParent(name: String, parent: String) {
-        parents.plusAssign(name to parent)
-    }
+    fun updateParent(name: String, parent: String) = parents.plusAssign(name to parent)
+
     // set or update a program's weight
-    fun updateWeight(name: String, weight: Int) {
-        weights.plusAssign(name to weight)
-    }
+    fun updateWeight(name: String, weight: Int) = weights.plusAssign(name to weight)
+
+    // set or update a program's full weight (including it's sub-towers
+    fun updateFullWeight(name: String, weight: Int) = fullWeights.plusAssign(name to weight)
+
+    // set or udpate whether a program's disc is balanced
+
 
     fun parseInput(line: String): Unit {
         // Capture of subprograms is overwritten, so capture all in comma-separated list
@@ -63,7 +71,7 @@ class Tower(var parents: MutableMap<String, String?>, var weights: MutableMap<St
 
 
 fun main(args: Array<String>) {
-    val tower = Tower(mutableMapOf<String, String?>(), mutableMapOf<String, Int?>())
+    val tower = Tower()
 
     // read the input from a file
     if (args.isNotEmpty()) {
