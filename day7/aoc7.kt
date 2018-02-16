@@ -12,7 +12,7 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     }
 }
 
-data class Tower(var parents: MutableMap<String, String?>, var weights: MutableMap<String, Int?>) {
+class Tower(var parents: MutableMap<String, String?>, var weights: MutableMap<String, Int?>) {
     fun updateParent(name: String, parent: String) {
         parents.plusAssign(name to parent)
     }
@@ -38,6 +38,16 @@ data class Tower(var parents: MutableMap<String, String?>, var weights: MutableM
             }
         } ?: throw InputException("No regex match for line: $line")
     }
+
+    fun findBase(): String {
+        var program = parents.toList().first().first
+        while (true) {
+            parents.get(program)?.let {
+                program = it
+            }?: break
+        }
+        return program
+    }
 }
 
 
@@ -46,19 +56,20 @@ fun main(args: Array<String>) {
     if (args.isNotEmpty()) {
         val filename = args[0]
         File(filename).forEachLine { line ->
-            tower.parseInput(line)
+            if (line.isNotEmpty()) {
+                tower.parseInput(line)
+            }
         }
     } else {
         while(true) {
             readLine().whenNotNullNorBlank { line ->
-                tower.parseInput(line)
+                if (line.isNotEmpty()) {
+                    tower.parseInput(line)
+                }
             } 
             ?: break
         }
     }
-    var program, base = tower.parents.toList().first()
-    while (base != null) {
-        program, base = tower.parents.get(program)
-    }
+    println("Tower base: ${tower.findBase()}")
 }
 
