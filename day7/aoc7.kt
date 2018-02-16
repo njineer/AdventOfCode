@@ -13,34 +13,45 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
 }
 
 class Tower(var parents: MutableMap<String, String?>, var weights: MutableMap<String, Int?>) {
+    // set or update a program's parent/base
     fun updateParent(name: String, parent: String) {
         parents.plusAssign(name to parent)
     }
+    // set or update a program's weight
     fun updateWeight(name: String, weight: Int) {
         weights.plusAssign(name to weight)
     }
 
     fun parseInput(line: String): Unit {
-        val linePattern = Regex("(\\w+)\\s+\\((\\d+)\\)\\s*(->\\s+(\\w+),\\s+(\\w+),\\s+(\\w+)\\s*)?")
+        // Capture of subprograms is overwritten, so capture all in comma-separated list
+        val linePattern = Regex("(\\w+)\\s+\\((\\d+)\\)\\s*(?:->\\s+((?:\\w+,?\\s*)+))?")
+        // match the regex
         linePattern.matchEntire(line)?.let { match ->
+            // filter the empty groups for the shorter matches
             match.groupValues.filter { it.isNotEmpty() }.let { groups ->
-                return when (groups.size) {
-                    3 -> updateWeight(match.groupValues[1], match.groupValues[2].toInt())
-                    7 -> {
-                        updateWeight(match.groupValues[1], match.groupValues[2].toInt())
-                        match.groupValues.slice(4..6).forEach {
-                            updateParent(it,match.groupValues[1])
-                        }
+                // program + weight
+                if(groups.size == 3) {
+                    updateWeight(match.groupValues[1], match.groupValues[2].toInt())
+                } 
+                // program + weight + subs
+                else if ( groups.size > 3) {
+                    updateWeight(match.groupValues[1], match.groupValues[2].toInt())
+                    match.groupValues.last().split(',').map{ it.trim() }.forEach { prog ->
+                        updateParent(prog, match.groupValues[1])
                     }
-                    else -> throw InputException("Expected 3 or 7 regex groups;" +  
-                                      "found ${match.groupValues.size} in '$line'")
+                // something bizarre; should never happen
+                } else {
+                    throw InputException("Regex match but fewer than 3 groups ?!?!?!?: $line")
                 }
             }
         } ?: throw InputException("No regex match for line: $line")
     }
 
+    // find the base of the tower
     fun findBase(): String {
+        // start with the first program
         var program = parents.toList().first().first
+        // move down the tower until parent==null
         while (true) {
             parents.get(program)?.let {
                 program = it
@@ -53,6 +64,8 @@ class Tower(var parents: MutableMap<String, String?>, var weights: MutableMap<St
 
 fun main(args: Array<String>) {
     val tower = Tower(mutableMapOf<String, String?>(), mutableMapOf<String, Int?>())
+
+    // read the input from a file
     if (args.isNotEmpty()) {
         val filename = args[0]
         File(filename).forEachLine { line ->
@@ -60,7 +73,9 @@ fun main(args: Array<String>) {
                 tower.parseInput(line)
             }
         }
-    } else {
+    } 
+    // read the input from stdin
+    else {
         while(true) {
             readLine().whenNotNullNorBlank { line ->
                 if (line.isNotEmpty()) {
