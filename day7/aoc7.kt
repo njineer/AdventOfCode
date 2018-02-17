@@ -15,7 +15,7 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
 data class Program(
     val name: String, 
     var weight: Int?, 
-    var parent: String?,
+    var parent: Program?,
     var subs: List<String>,
     var balanced: Boolean?,
     var fullWeight: Int?
@@ -31,15 +31,17 @@ class Tower() {
     var programs = mutableMapOf<String, Program>()
 
     // set or update a program's parent/base
-    fun updateParent(name: String, parent: String) { 
+    fun updateParent(name: String, parent: Program): Program { 
         val p = programs.getOrPut(name) { Program(name) }    
         p.parent = parent
+        return p
     }
 
     // set or update a program's weight
-    fun updateWeight(name: String, weight: Int) {
+    fun updateWeight(name: String, weight: Int): Program {
         val p = programs.getOrPut(name) { Program(name) }    
         p.weight = weight
+        return p
     }
 
     fun parseInput(line: String): Unit {
@@ -55,9 +57,9 @@ class Tower() {
                 } 
                 // program + weight + subs
                 else if ( groups.size > 3) {
-                    updateWeight(match.groupValues[1], match.groupValues[2].toInt())
-                    match.groupValues.last().split(',').map{ it.trim() }.forEach { prog ->
-                        updateParent(prog, match.groupValues[1])
+                    val program = updateWeight(match.groupValues[1], match.groupValues[2].toInt())
+                    match.groupValues.last().split(',').map{ it.trim() }.forEach {
+                        updateParent(it, program)
                     }
                 // something bizarre; should never happen
                 } else {
@@ -73,7 +75,7 @@ class Tower() {
         var program = programs.toList().first().second
         // move down the tower until parent==null
         while (true) {
-            programs.get(program.parent)?.let {
+            program.parent?.let {
                 program = it
             }?: break
         }
