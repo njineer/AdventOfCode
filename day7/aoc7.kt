@@ -21,31 +21,26 @@ data class Program(
     var fullWeight: Int?
 ) 
 {
+    constructor (name: String) : this(name, null, null, listOf<String>(), null, null)
     constructor (name: String, weight: Int) : this(name, weight, null, listOf<String>(), null, null)
     constructor (name: String, weight: Int, subs: List<String>) : this(name, weight, null, subs, null, null)
-
     // fullWeight property?
 }
 
 class Tower() {
-    var parents = mutableMapOf<String, String?>()
-    var weights = mutableMapOf<String, Int>()
-    var fullWeights = mutableMapOf<String, Int>()
-    var balance = mutableMapOf<String, Boolean>()
-    
-    var base: String? = null
+    var programs = mutableMapOf<String, Program>()
 
     // set or update a program's parent/base
-    fun updateParent(name: String, parent: String) = parents.plusAssign(name to parent)
+    fun updateParent(name: String, parent: String) { 
+        val p = programs.getOrPut(name) { Program(name) }    
+        p.parent = parent
+    }
 
     // set or update a program's weight
-    fun updateWeight(name: String, weight: Int) = weights.plusAssign(name to weight)
-
-    // set or update a program's full weight (including it's sub-towers
-    fun updateFullWeight(name: String, weight: Int) = fullWeights.plusAssign(name to weight)
-
-    // set or udpate whether a program's disc is balanced
-    fun updateBalance(name: String, balanced: Boolean) = balance.plusAssign(name to balanced)
+    fun updateWeight(name: String, weight: Int) {
+        val p = programs.getOrPut(name) { Program(name) }    
+        p.weight = weight
+    }
 
     fun parseInput(line: String): Unit {
         // Capture of subprograms is overwritten, so capture all in comma-separated list
@@ -73,16 +68,15 @@ class Tower() {
     }
 
     // find the base of the tower
-    fun findBase(): String {
+    fun findBase(): Program {
         // start with the first program
-        var program = parents.toList().first().first
+        var program = programs.toList().first().second
         // move down the tower until parent==null
         while (true) {
-            parents.get(program)?.let {
+            programs.get(program.parent)?.let {
                 program = it
             }?: break
         }
-        base = program
         return program
     }
 }
@@ -112,6 +106,6 @@ fun main(args: Array<String>) {
         }
     }
     val base = tower.findBase()
-    println("Tower base: $base")
+    println("Tower base: ${base.name}")
 }
 
