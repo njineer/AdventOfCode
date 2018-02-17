@@ -16,14 +16,14 @@ data class Program(
     val name: String, 
     var weight: Int?, 
     var parent: Program?,
-    var subs: List<String>,
+    var subs: List<Program>,
     var balanced: Boolean?,
     var fullWeight: Int?
 ) 
 {
-    constructor (name: String) : this(name, null, null, listOf<String>(), null, null)
-    constructor (name: String, weight: Int) : this(name, weight, null, listOf<String>(), null, null)
-    constructor (name: String, weight: Int, subs: List<String>) : this(name, weight, null, subs, null, null)
+    constructor (name: String) : this(name, null, null, listOf<Program>(), null, null)
+    constructor (name: String, weight: Int) : this(name, weight, null, listOf<Program>(), null, null)
+    constructor (name: String, weight: Int, subs: List<Program>) : this(name, weight, null, subs, null, null)
     // fullWeight property?
 }
 
@@ -57,9 +57,8 @@ class Tower() {
                 } 
                 // program + weight + subs
                 else if ( groups.size > 3) {
-                    val program = updateWeight(match.groupValues[1], match.groupValues[2].toInt())
-                    match.groupValues.last().split(',').map{ it.trim() }.forEach {
-                        updateParent(it, program)
+                    updateWeight(match.groupValues[1], match.groupValues[2].toInt()).run {
+                        subs = match.groupValues.last().split(',').map{ updateParent(it.trim(), this) }
                     }
                 // something bizarre; should never happen
                 } else {
