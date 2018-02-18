@@ -18,17 +18,17 @@ data class Program(
     var parent: Program?,
     var subs: List<Program>,
     var balanced: Boolean?,
-    var fullWeight: Int?
+    var fullWeight: Int
 ) 
 {
-    constructor (name: String) : this(name, null, null, listOf<Program>(), null, null)
-    constructor (name: String, weight: Int) : this(name, weight, null, listOf<Program>(), null, null)
-    constructor (name: String, weight: Int, subs: List<Program>) : this(name, weight, null, subs, null, null)
-    // fullWeight property?
+    constructor (name: String) : this(name, null, null, listOf<Program>(), null, 0)
+    //constructor (name: String, weight: Int) : this(name, weight, null, listOf<Program>(), null, null)
+    //constructor (name: String, weight: Int, subs: List<Program>) : this(name, weight, null, subs, null, null)
 }
 
 class Tower() {
     var programs = mutableMapOf<String, Program>()
+    var base: Program? = null
 
     // set or update a program's parent/base
     fun updateParent(name: String, parent: Program): Program { 
@@ -69,7 +69,7 @@ class Tower() {
     }
 
     // find the base of the tower
-    fun findBase(): Program {
+    fun updateBase() {
         // start with the first program
         var program = programs.toList().first().second
         // move down the tower until parent==null
@@ -78,7 +78,20 @@ class Tower() {
                 program = it
             }?: break
         }
-        return program
+        base = program
+    }
+
+    fun updateFullWeight(program: Program) {
+        program.fullWeight = program.weight?.let { weight ->
+            weight + program.subs.onEach { sub -> updateFullWeight(sub) } .sumBy { it.fullWeight } 
+        }?: 0
+        if (program.subs.isEmpty()) {
+            program.balanced = true
+        } else {
+            program.balanced = program.subs.first().fullWeight.let { firstWeight ->
+                program.subs.drop(1).all { it.fullWeight == firstWeight }
+            }
+        }
     }
 }
 
@@ -106,7 +119,11 @@ fun main(args: Array<String>) {
             ?: break
         }
     }
-    val base = tower.findBase()
-    println("Tower base: ${base.name}")
+    tower.updateBase()
+    println("Tower base: ${tower.base?.name}")
+    tower.base?.let {
+        tower.updateFullWeight(it)
+    }
+    println("Tower balanced = ${tower.base?.balanced}")
 }
 
