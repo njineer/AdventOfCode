@@ -12,16 +12,17 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     }
 }
 
+
 data class Program(
     val name: String, 
     var weight: Int?, 
     var parent: Program?,
     var subs: List<Program>,
-    var balanced: Boolean?,
+    var balanced: Boolean,
     var fullWeight: Int
 ) 
 {
-    constructor (name: String) : this(name, null, null, listOf<Program>(), null, 0)
+    constructor (name: String) : this(name, null, null, listOf<Program>(), false, 0)
     //constructor (name: String, weight: Int) : this(name, weight, null, listOf<Program>(), null, null)
     //constructor (name: String, weight: Int, subs: List<Program>) : this(name, weight, null, subs, null, null)
 }
@@ -81,15 +82,35 @@ class Tower() {
         base = program
     }
 
-    fun updateFullWeight(program: Program) {
+    fun updatefullWeight(program: Program) {
         program.fullWeight = program.weight?.let { weight ->
-            weight + program.subs.onEach { sub -> updateFullWeight(sub) } .sumBy { it.fullWeight } 
+            weight + program.subs.onEach { sub -> updatefullWeight(sub) } .sumBy { it.fullWeight } 
         }?: 0
         if (program.subs.isEmpty()) {
             program.balanced = true
         } else {
             program.balanced = program.subs.first().fullWeight.let { firstWeight ->
                 program.subs.drop(1).all { it.fullWeight == firstWeight }
+            }
+        }
+    }
+
+    fun findImbalance(prog: Program) {
+        if (!prog.balanced) {
+            println("${prog.name} is imbalanced.")
+            prog.subs.filterNot { it.balanced }.let { unbalanced ->
+                if (unbalanced.isNotEmpty()) {
+                    unbalanced.forEach {
+                        findImbalance(it)
+                    }
+                } else {
+                    println("Imbalance in:")
+                    prog.subs.map { 
+                        it.weight?.let { weight ->
+                            println("${it.name}: ${weight}, ${it.fullWeight}")
+                        }
+                    }
+                }
             }
         }
     }
@@ -122,8 +143,8 @@ fun main(args: Array<String>) {
     tower.updateBase()
     println("Tower base: ${tower.base?.name}")
     tower.base?.let {
-        tower.updateFullWeight(it)
+        tower.updatefullWeight(it)
+        tower.findImbalance(it)
     }
-    println("Tower balanced = ${tower.base?.balanced}")
 }
 
