@@ -13,6 +13,8 @@ fun lt(a: Int, b: Int): Boolean = a < b
 fun gt(a: Int, b: Int): Boolean = a > b
 fun ge(a: Int, b: Int): Boolean = a >= b
 
+data class RegisterResults(val registers: Map<String, Int>, val peakValue: Int)
+
 val comparators = mapOf (
     "=="  to ::eq,
     "!="  to ::ne,
@@ -76,8 +78,9 @@ fun parseInputs(inputs: List<String>): List<List<String>> {
     return instructions.toList()
 }
 
-fun processInstructions(instructions: List<List<String>>): Map<String, Int> {
+fun processInstructions(instructions: List<List<String>>): RegisterResults {
     var registers = mutableMapOf<String, Int>()
+    var peakValue = 0
     instructions.forEach { instr ->
         val reg = instr[0]
         val op = operators.getOrElse(instr[1].toLowerCase()) { throw InputException("Expected 'inc' or 'dec'; found ${instr[1]}") }
@@ -94,15 +97,21 @@ fun processInstructions(instructions: List<List<String>>): Map<String, Int> {
                 registers[reg] = it.op(amount)
             }
         }
+
+        registers.values.max()?.let {
+            peakValue = maxOf(peakValue, it)
+        }
     }
-    return registers.toMap()
+    return RegisterResults(registers.toMap(), peakValue)
 }
 
 
 fun main(args: Array<String>) {
-    val registers = processInstructions(parseInputs(getInput(args)))
+    val (registers, peakValue) = processInstructions(parseInputs(getInput(args)))
     //registers.forEach { println(it) }
-    val maxRegister = registers.maxBy { (_, value) ->  value }
-    println("Max value: $maxRegister")
+    registers.values.max()?.let {
+        println("current max: $it")
+    }
+    println("peak value: $peakValue")
 }
 
