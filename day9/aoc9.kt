@@ -11,7 +11,7 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
 }
 
 
-fun scoreCharStream(charStream: String): Int {
+fun scoreCharStream(charStream: String): Pair<Int, Int> {
     val groupStart = '{'
     val groupEnd = '}'
     val garbageStart = '<'
@@ -22,11 +22,17 @@ fun scoreCharStream(charStream: String): Int {
     var cancel = false
     var group = 0
     var score = 0
+    var garbage = 0
 
     //println(charStream)
 
     charStream.forEach { chr ->
         if (!cancel) {
+
+            if (inGarbage && chr != cancellation && chr != garbageEnd) {
+                garbage++
+            }
+        
             when (chr) {
                 groupStart -> {
                     if (!inGarbage) 
@@ -42,13 +48,14 @@ fun scoreCharStream(charStream: String): Int {
                 cancellation ->
                     cancel = true
             }
+
         } else {
             cancel = false
         }
         //println("chr($chr), inGarbage($inGarbage), group($group), cancel($cancel), score($score)")
     }
 
-    return score
+    return Pair(score, garbage)
 }
 
 fun main(args: Array<String>) {
@@ -66,6 +73,6 @@ fun main(args: Array<String>) {
         }
     }
 
-    val score = scoreCharStream(charStream)
-    println(score)
+    val (score, garbage) = scoreCharStream(charStream)
+    println("score = $score, garbage = $garbage")
 }
