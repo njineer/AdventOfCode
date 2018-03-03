@@ -7,5 +7,6 @@ else
     touch aoc$1.kt
     echo "sources = aoc$1.kt\n\naoc$1.jar: \$(sources)\n\t@kotlinc \$^ -include-runtime -d \$@\n" > Makefile
     echo "if [ -f aoc$1.jar ]; then\n\tjava -jar aoc$1.jar \$@\nelse\n\techo \"Missing .jar\"\nfi\n" > aoc$1.sh
+    chmod 775 aoc$1.sh
     cd -
 fi
