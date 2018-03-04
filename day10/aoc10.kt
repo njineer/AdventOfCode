@@ -1,8 +1,6 @@
-package aoc9
+package aoc10
 
 import java.lang.Exception
-
-class AsciiException(override var message:String): Exception(message)
 
 fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     return this?.let { receiver ->
@@ -12,69 +10,85 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     }
 }
 
-// Convert a string to a list of ASCII values
-// Doesn't need to be a class, but hey: language features!
-class Asciifier(val bytes: String) {
-    companion object AsciiTable {
-        val asciiTable = mapOf (
-            ',' to 44,
-            '0' to 48, '1' to 49,
-            '2' to 50, '3' to 51,
-            '4' to 52, '5' to 53,
-            '6' to 54, '7' to 55,
-            '8' to 56, '9' to 57
-        )
-        fun bytesToList(bytes: String): List<Int> {
-            return bytes.map { asciiTable.getOrElse(it) { throw AsciiException("$it not in Ascii table") } }
-        }
+fun <T, R> List<T>.mapBlocks(blockSize: Int, f: (List<T>) -> R): List<R> {
+    var results = listOf<R>()
+
+    val fullBlocks = this.size / blockSize
+    val blockRemainder = this.size % blockSize
+
+    repeat(fullBlocks) { i ->
+        results = results + f(this.slice((i*blockSize)..(i*blockSize + blockSize-1)))
     }
 
+    if (blockRemainder != 0) {
+        results = results + f(this.drop(this.size-blockRemainder))
+    }
+
+    return results
 }
 
-class Hash(val listSize: Int, var current: Int, var skipSize: Int) {
-    var list: MutableList<Int>
-    constructor (listSize: Int): this(listSize, 0, 0)
+class KnotHash(val circleSize: Int, var current: Int, var skipSize: Int) {
+    var circle: MutableList<Int>
+
+    constructor (circleSize: Int): this(circleSize, 0, 0)
     init {
-        list = (0..(listSize-1)).toMutableList()
+        circle = (0..(circleSize-1)).toMutableList()
+    }
+
+    fun reset() {
+        circle = (0..(circleSize-1)).toMutableList()
+        current = 0
+        skipSize = 0
     }
 
     fun singleRound(lengths: List<Int>) {
-        // default to list size of 256 if not specified
+        // default to circle size of 256 if not specified
         lengths.forEach { length ->
             // amount we wrap around if we do
-            val wrapAround = current + length - listSize
+            val wrapAround = current + length - circleSize
             // end of the non-wrap-around section to reverse
-            val rangeEnd = minOf(current + length - 1, listSize - 1)
+            val rangeEnd = minOf(current + length - 1, circleSize - 1)
     
             // section to be reversed
-            var toReverse = list.slice(current..rangeEnd)
+            var toReverse = circle.slice(current..rangeEnd)
             // add the rest of the section if we wrapped around
             if (wrapAround > 0) {
-                toReverse += list.slice(0..wrapAround-1)
+                toReverse += circle.slice(0..wrapAround-1)
             }
     
             // reverse the section and overwrite the corresponding items in the original
             toReverse.asReversed().let { reversed ->
                 (current..rangeEnd).forEach { i ->
-                    list[i] = reversed[i-current]
+                    circle[i] = reversed[i-current]
                 }
                 if (wrapAround > 0) {
                     (0..wrapAround-1).forEach { i ->
-                        list[i] = reversed[length-wrapAround+i]
+                        circle[i] = reversed[length-wrapAround+i]
                     }
                 }
             }
-            current = (current + length + skipSize) % listSize
+            current = (current + length + skipSize) % circleSize
             skipSize++
         }
     }
 
-    fun reset() {
-        list = (0..(listSize-1)).toMutableList()
-        current = 0
-        skipSize = 0
+    fun hash(lengths: List<Int>): String {
+        // 64 rounds
+        repeat(64) {
+            singleRound(lengths)
+        }
+        // xor each block of 16 values
+        return circle.mapBlocks(16) { 
+            it.fold(0) { 
+                acc, x -> acc xor x 
+            } 
+        // hex string output
+        }.map {
+            String.format("%02X".format(it))
+        }.joinToString("")
     }
 }
+
 
 fun main(args: Array<String>) {
     readLine().whenNotNullNorBlank { input ->
@@ -84,22 +98,24 @@ fun main(args: Array<String>) {
             } else {
                 256
             }
-            
+           
+        val knotHash = KnotHash(listSize)
+
         // part 1
-        val lengths1 = input.split(",") .map { it.toInt() }
-        val hash = Hash(listSize)
-        hash.singleRound(lengths1)
-        println(hash.list[0]*hash.list[1])
+        try {
+            val lengths1 = input.split(",") .map { it.toInt() }
+            knotHash.singleRound(lengths1)
+            println("part1: ${knotHash.circle[0]*knotHash.circle[1]}")
+        } catch (e: NumberFormatException) {
+            println("Not a comma-separated numerical input; skipping part 1")
+        }
 
-        hash.reset()
+        knotHash.reset()
 
-        val suffix = listOf(17, 31, 73, 47, 23)
-        val lengths2 = Asciifier.bytesToList(input) + suffix
-        println(lengths2)
-        
         // part 2
-
-
+        val suffix = listOf(17, 31, 73, 47, 23)
+        val lengths2 = input.map { it.toInt() } + suffix
+        println("part2: ${knotHash.hash(lengths2)}")
     }
 }
 
