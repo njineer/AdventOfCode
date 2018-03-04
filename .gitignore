@@ -1,6 +1,8 @@
 aoc
 input*.txt
+example_input.txt
 *.jar
 *.swp
 *.swo
 *.pyc
+*.log
