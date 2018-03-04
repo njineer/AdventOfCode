@@ -10,6 +10,7 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
 
 fun main(args: Array<String>) {
     readLine().whenNotNullNorBlank { input ->
+        // default to list size of 256 if not specified
         val listSize = 
             if (args.isNotEmpty()) {
                 args[0].toInt()
@@ -23,22 +24,26 @@ fun main(args: Array<String>) {
             .split(",")
             .map { it.toInt() }
             .forEach { length ->
-                val overlap = current + length - listSize
+                // amount we wrap around if we do
+                val wrapAround = current + length - listSize
+                // end of the non-wrap-around section to reverse
                 val rangeEnd = minOf(current + length - 1, listSize - 1)
-                println("current ($current) length ($length), overlap ($overlap), rangeEnd ($rangeEnd)")
 
+                // section to be reversed
                 var toReverse = list.slice(current..rangeEnd)
-                if (overlap > 0) {
-                    toReverse += list.slice(0..overlap-1)
+                // add the rest of the section if we wrapped around
+                if (wrapAround > 0) {
+                    toReverse += list.slice(0..wrapAround-1)
                 }
 
+                // reverse the section and overwrite the corresponding items in the original
                 toReverse.asReversed().let { reversed ->
                     (current..rangeEnd).forEach { i ->
                         list[i] = reversed[i-current]
                     }
-                    if (overlap > 0) {
-                        (0..overlap-1).forEach { i ->
-                            list[i] = reversed[length-overlap+i]
+                    if (wrapAround > 0) {
+                        (0..wrapAround-1).forEach { i ->
+                            list[i] = reversed[length-wrapAround+i]
                         }
                     }
                 }

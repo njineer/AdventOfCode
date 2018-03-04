@@ -12,6 +12,7 @@ fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
 
 
 fun scoreCharStream(charStream: String): Pair<Int, Int> {
+    // delimiters
     val groupStart = '{'
     val groupEnd = '}'
     val garbageStart = '<'
@@ -24,22 +25,23 @@ fun scoreCharStream(charStream: String): Pair<Int, Int> {
     var score = 0
     var garbage = 0
 
-    //println(charStream)
-
     charStream.forEach { chr ->
+        // if the last character wasn't a cancellation
         if (!cancel) {
-
+            // count garbage if we are in garbage and 
+            //     this isn't a cancellation or the end of the garbage
             if (inGarbage && chr != cancellation && chr != garbageEnd) {
                 garbage++
             }
-        
             when (chr) {
                 groupStart -> {
                     if (!inGarbage) 
+                        // track how deep in the hierarchy we are
                         group++
                 }
                 groupEnd -> 
                     if (!inGarbage) 
+                        // score based on the hierarchy depth and 'pop' back a level
                         score += group--
                 garbageStart -> 
                     inGarbage = true
@@ -50,11 +52,11 @@ fun scoreCharStream(charStream: String): Pair<Int, Int> {
             }
 
         } else {
+            // this char is canceled
             cancel = false
         }
-        //println("chr($chr), inGarbage($inGarbage), group($group), cancel($cancel), score($score)")
     }
-
+    //return the total score and theamount of garbage
     return Pair(score, garbage)
 }
 
