@@ -48,13 +48,21 @@ fun main(args: Array<String>) {
         }
     }
 
+    var maxDistance = 0
     var origin = Hexagon(0,0,0)
     val distance = path
         .split(',')
         .map { neighbors.getOrElse(it) { throw DirectionException("Unknown direction: $it") } }
-        .reduce { acc, step -> acc + step }
+        .reduce { acc, step -> 
+            acc.distance(origin).let {
+                if (it > maxDistance)
+                    maxDistance = it
+            }
+            acc + step 
+        }
         .distance(origin)
 
-    println(distance)
+    println("Drect path istance: $distance")
+    println("Max distance from origin: $maxDistance")
 }
 
