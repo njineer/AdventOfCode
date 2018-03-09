@@ -2,6 +2,7 @@ package aoc12
 
 import java.lang.Exception
 import java.io.File
+import java.util.LinkedList
 
 class InputException(override var message:String): Exception(message)
 
@@ -48,6 +49,25 @@ fun parseInput(connections: List<String>): Map<Int, List<Int>> {
     return pipes.toMap()
 }
 
+fun findConnections(pipes: Map<Int, List<Int>>, origin: Int): List<Int> {
+    var visited = mutableSetOf<Int>()
+    var queue = LinkedList<Int>()
+    queue.add(origin)
+    while (queue.isNotEmpty()) {
+        val cur = queue.poll()
+        if (visited.contains(cur)) {
+            continue
+        } else {
+            visited.add(cur)
+            queue.addAll(pipes[cur]!!)
+        }
+    }
+    return visited.toList()
+
+}
+
 fun main(args: Array<String>) {
     val pipes = parseInput(readInput(args))
+    val conns = findConnections(pipes, 0)
+    println("${conns.size} connections to 0")
 }
