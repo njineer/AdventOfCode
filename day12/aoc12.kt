@@ -67,7 +67,15 @@ fun findConnections(pipes: Map<Int, List<Int>>, origin: Int): List<Int> {
 }
 
 fun main(args: Array<String>) {
-    val pipes = parseInput(readInput(args))
-    val conns = findConnections(pipes, 0)
-    println("${conns.size} connections to 0")
+    var pipes = parseInput(readInput(args))
+    var groups = mutableListOf<List<Int>>()
+    println("part 1: ${findConnections(pipes, 0).size} connections to 0")
+
+    while (pipes.isNotEmpty()) {
+        val origin = pipes.toList().first().first
+        val conns = findConnections(pipes, origin)
+        groups.add(conns)
+        pipes -= conns
+    }
+    println("${groups.size} groups")
 }
