@@ -48,9 +48,12 @@ fun parseInput(inputs: List<String>): Map<Int, Int>? {
     return layers.toMap()
 }
 
+// send a packet starting at time=0
+//      return getting-caught-severity
 fun sendPacket(firewall: Map<Int, Int>) = 
     firewall.map { (layer, range) ->
-        //println("layer($layer), range($range), modulus(${2*(range-1)})")
+        // when starting at t=0, the packet will reach layer i at t=i
+        // if the scanner is at [0] at that time: caught
         if (layer % (2*(range-1)) == 0) {
             range * layer
         } else {
@@ -58,11 +61,25 @@ fun sendPacket(firewall: Map<Int, Int>) =
         }
     }.sum()
 
+// brute-force sending at packet at each delay value until not caught
+//      assuming there is a solution; infinite otherwise
+fun delayPacket(firewall: Map<Int, Int>): Int {
+    var delay = 0
+    while(
+        firewall.filter { (layer, range) -> 
+            (layer + delay) % (2*(range-1)) == 0
+        }.isNotEmpty()
+    ) delay++
+
+    return delay
+}
+
 
 fun main(args: Array<String>) {
     parseInput(readInput(args))?.let { firewall ->
         //println(firewall)
         println("Severity: ${sendPacket(firewall)}")
+        println("Delay to not get caught: ${delayPacket(firewall)}")
     }
 }
 
