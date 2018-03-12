@@ -32,7 +32,7 @@ fun readInput(args: Array<String>): List<String> {
     return inputs.toList()
 }
 
-fun parseInput(inputs: List<String>): List<Int>? {
+fun parseInput(inputs: List<String>): Map<Int, Int>? {
     val layers = mutableMapOf<Int, Int>()
 
     // match <layer depth>: <range>
@@ -45,19 +45,24 @@ fun parseInput(inputs: List<String>): List<Int>? {
             layers[depth] = range
         } ?: throw InputException("No regex match for instr: $input")
     }
-
-    // fill in the 'missing' layers with range = 0
-    return if (layers.isNotEmpty()) {
-        (0..layers.keys.max()!!).map { layers.getOrDefault(it, 0) }
-    } else {
-        null
-    }
+    return layers.toMap()
 }
+
+fun sendPacket(firewall: Map<Int, Int>) = 
+    firewall.map { (layer, range) ->
+        //println("layer($layer), range($range), modulus(${2*(range-1)})")
+        if (layer % (2*(range-1)) == 0) {
+            range * layer
+        } else {
+            0
+        }
+    }.sum()
 
 
 fun main(args: Array<String>) {
-    var firewall = parseInput(readInput(args))
-    println(firewall)
-
+    parseInput(readInput(args))?.let { firewall ->
+        //println(firewall)
+        println("Severity: ${sendPacket(firewall)}")
+    }
 }
 
