@@ -49,6 +49,7 @@ fun parseInput(connections: List<String>): Map<Int, List<Int>> {
     return pipes.toMap()
 }
 
+// bfs from origin to find all connections
 fun findConnections(pipes: Map<Int, List<Int>>, origin: Int): List<Int> {
     var visited = mutableSetOf<Int>()
     var queue = LinkedList<Int>()
@@ -72,10 +73,14 @@ fun main(args: Array<String>) {
     println("part 1: ${findConnections(pipes, 0).size} connections to 0")
 
     while (pipes.isNotEmpty()) {
+        // use a random starting point
         val origin = pipes.toList().first().first
+        // find all connections to that point
         val conns = findConnections(pipes, origin)
+        // that connection set is a new group
         groups.add(conns)
+        // search the remaining ungrouped points
         pipes -= conns
     }
-    println("${groups.size} groups")
+    println("part 2: ${groups.size} groups")
 }
