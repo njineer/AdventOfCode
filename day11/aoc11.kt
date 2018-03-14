@@ -16,6 +16,7 @@ data class Hexagon(var x: Int, var y: Int, var z: Int) {
     }
 }
 
+// axial coordinate relative offsets of a neighbor hexagon
 val neighbors = mapOf (
     "n"  to Hexagon( 0,  1, -1),
     "ne" to Hexagon( 1,  0, -1),
@@ -55,12 +56,13 @@ fun main(args: Array<String>) {
         .map { neighbors.getOrElse(it) { throw DirectionException("Unknown direction: $it") } }
         .reduce { acc, step -> 
             acc.distance(origin).let {
+                // keep track of the furthest distance from origin
                 if (it > maxDistance)
                     maxDistance = it
             }
             acc + step 
         }
-        .distance(origin)
+        .distance(origin) // distance of the destination to the origin
 
     println("Drect path istance: $distance")
     println("Max distance from origin: $maxDistance")
