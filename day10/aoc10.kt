@@ -84,7 +84,7 @@ class KnotHash(val circleSize: Int, var current: Int, var skipSize: Int) {
             } 
         // hex string output
         }.map {
-            String.format("%02X".format(it))
+            "%02X".format(it)
         }.joinToString("")
     }
 }
