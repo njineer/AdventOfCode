@@ -27,6 +27,7 @@ fun <T, R> List<T>.mapBlocks(blockSize: Int, f: (List<T>) -> R): List<R> {
 
 class KnotHash(val circleSize: Int, var current: Int, var skipSize: Int) {
     var circle: MutableList<Int>
+    val suffix = listOf(17, 31, 73, 47, 23)
 
     constructor (circleSize: Int): this(circleSize, 0, 0)
     constructor (): this(256, 0, 0)
@@ -78,7 +79,7 @@ class KnotHash(val circleSize: Int, var current: Int, var skipSize: Int) {
             singleRound(lengths)
         }
         // xor each block of 16 values
-        return circle.mapBlocks(16) { 
+        val result = circle.mapBlocks(16) { 
             it.reduce { 
                 acc, x -> acc xor x 
             } 
@@ -86,9 +87,12 @@ class KnotHash(val circleSize: Int, var current: Int, var skipSize: Int) {
         }.map {
             "%02X".format(it)
         }.joinToString("")
+
+        reset()
+        return result
     }
 
-    fun hash(input: String): String = hash(input.map { it.toInt() })
+    fun hash(input: String): String = hash(input.map { it.toInt() } + suffix)
 
 }
 
@@ -112,18 +116,11 @@ fun main(args: Array<String>) {
             readLine()
         }
       
-    listOf("1248", "369AC", "FFAFF").map {
-        println("$it: ${countBitsSet(it)}")
-    }
-
     input.whenNotNullNorBlank { baseInput ->
         val knotHash = KnotHash()
         //val usedBlocks = (0..127).map {
         val usedBlocks = (0..127).map {
-            val lineInput = "%s-%d".format(baseInput, it)
-            val hash = knotHash.hash(lineInput)
-            println("$lineInput -> $hash")
-            hash
+            knotHash.hash("%s-%d".format(baseInput, it))
         }.map {
             countBitsSet(it)
         }.sum()
