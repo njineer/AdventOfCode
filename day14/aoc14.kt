@@ -1,5 +1,7 @@
 package aoc14
 
+import kotlin.math.pow
+
 fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
     return this?.let { receiver ->
         if (receiver.isNotBlank()) {
@@ -35,12 +37,13 @@ fun Int.bitsSet(): Int {
     return bitCount
 }
 
-fun countBitsSet(hex: String) = hex.map { it.toString().toInt(16).bitsSet() }.sum()
+fun Int.bitAt(index: Int): Boolean = ((this shr index) and 1) != 0
 
-
-class KnotHash(val words: List<Int>) {
+class KnotHash(val words: List<Int>, val wordSize: Int=16) {
+    val mask = 2.0.pow(wordSize).toInt()-1
     override fun toString() = words.map { "%02X".format(it) }.joinToString("")
-    fun bitsSet() = words.map { (it and 0xFFFF).bitsSet() } .sum()
+    fun bitsSet() = words.map { (it and mask).bitsSet() } .sum()
+    fun bitAt(index: Int): Boolean = words[index % wordSize].bitAt(index/wordSize)
 }
 
 class KnotHasher(val circleSize: Int, var current: Int, var skipSize: Int) {
@@ -111,6 +114,15 @@ class KnotHasher(val circleSize: Int, var current: Int, var skipSize: Int) {
 
     fun hash(input: String) = hash(input.map { it.toInt() } + suffix)
 
+}
+
+fun groupOnes(hashes: List<KnotHash>, wordSize: Int=16) {
+    var groups = mutableMapOf<Int, MutableList<Pair<Int, Int>>>()
+    hashes.forEachIndexed { row, hash ->
+        (0..wordSize-1).forEach {
+
+        }
+    }
 }
 
 fun main(args: Array<String>) {
