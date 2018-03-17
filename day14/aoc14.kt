@@ -39,11 +39,21 @@ fun Int.bitsSet(): Int {
 
 fun Int.bitAt(index: Int): Boolean = ((this shr index) and 1) != 0
 
+fun Boolean?.falseIfNull(): Boolean = if (this != null) this else false
+
+
 class KnotHash(val words: List<Int>, val wordSize: Int=16) {
-    val mask = 2.0.pow(wordSize).toInt()-1
+    val mask = 2f.pow(wordSize).toInt()-1
+    val size: Int 
+        get() = words.size * wordSize
+
     override fun toString() = words.map { "%02X".format(it) }.joinToString("")
     fun bitsSet() = words.map { (it and mask).bitsSet() } .sum()
-    fun bitAt(index: Int): Boolean = words[index % wordSize].bitAt(index/wordSize)
+    fun bitAt(index: Int): Boolean? =
+        if (index > 0 && index < wordSize*words.size) {
+            words[index % wordSize].bitAt(index/wordSize)
+        } else 
+            null
 }
 
 class KnotHasher(val circleSize: Int, var current: Int, var skipSize: Int) {
@@ -116,11 +126,32 @@ class KnotHasher(val circleSize: Int, var current: Int, var skipSize: Int) {
 
 }
 
-fun groupOnes(hashes: List<KnotHash>, wordSize: Int=16) {
-    var groups = mutableMapOf<Int, MutableList<Pair<Int, Int>>>()
+fun groupOnes(hashes: List<KnotHash>) {
+    var groupIndex = 0
+    var groups = mutableMapOf<Pair<Int, Int>, Int>()
+    // for each row
     hashes.forEachIndexed { row, hash ->
-        (0..wordSize-1).forEach {
-
+        // for each column
+        (0..hash.size-1).forEach { col ->
+            // if this square is used
+            if (hash.bitAt(col).falseIfNull()) {
+                // is the west and/or north neighbor grouped?
+                var westGroup = groups.get(Pair(row, col))
+                var northGroup = groups.get(Pair(row-1, col))
+                when {
+                    westGroup != null && northGroup != null -> {
+                        groups.put(Pair(row, col), westGroup)
+                        groups.filterValues { it == northGroup} 
+                              .mapValuesTo(groups) { westGroup }
+                    }
+                    // add to west group
+                    westGroup != null -> groups.put(Pair(row, col), westGroup)
+                    // add to north group
+                    northGroup != null -> groups.put(Pair(row, col), northGroup)
+                    // add to west group; merge north group into west
+                    else -> groups.put(Pair(row, col), groupIndex++)
+                }
+            }
         }
     }
 }
