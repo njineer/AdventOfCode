@@ -27,6 +27,7 @@ fun <T, R> List<T>.mapBlocks(blockSize: Int, f: (List<T>) -> R): List<R> {
     return results
 }
 
+// count the number of bits set in an Int
 fun Int.bitsSet(): Int {
     var thisCopy = this
     var bitCount = 0
@@ -37,21 +38,32 @@ fun Int.bitsSet(): Int {
     return bitCount
 }
 
+// determine if the bit at index is set
 fun Int.bitAt(index: Int): Boolean = ((this shr index) and 1) != 0
 
+// passthrough if boolean is non-null; false if otherwise
 fun Boolean?.falseIfNull(): Boolean = if (this != null) this else false
 
-
-class KnotHash(val words: List<Int>, val wordSize: Int=16) {
+// Using Int because Kotlin support for Short/Byte operations is experimental at the moment,
+//      and it allows non-generic class
+// wordSize defaults to 8 because all inputs are ASCII values < 256
+class KnotHash(val words: List<Int>, val wordSize: Int=8) {
     val mask = 2f.pow(wordSize).toInt()-1
     val size: Int 
         get() = words.size * wordSize
 
+    // TODO: make format string wordSize dependent
     override fun toString() = words.map { "%02X".format(it) }.joinToString("")
+
+    // count the number of bits set
     fun bitsSet() = words.map { (it and mask).bitsSet() } .sum()
+
+    // check if the bit at a particular index is set
     fun bitAt(index: Int): Boolean? =
-        if (index > 0 && index < wordSize*words.size) {
-            words[index % wordSize].bitAt(index/wordSize)
+        // make sure the index is in range
+        if (index >= 0 && index < wordSize*words.size) {
+            // find the word, then the bit within the word
+            words[index / wordSize].bitAt(wordSize - (index % wordSize) - 1)
         } else 
             null
 }
@@ -66,6 +78,8 @@ class KnotHasher(val circleSize: Int, var current: Int, var skipSize: Int) {
         circle = (0..(circleSize-1)).toMutableList()
     }
 
+    // reset internal vars between hashes
+    // TODO: make these temp/non-member vars?
     fun reset() {
         circle = (0..(circleSize-1)).toMutableList()
         current = 0
@@ -126,19 +140,20 @@ class KnotHasher(val circleSize: Int, var current: Int, var skipSize: Int) {
 
 }
 
-fun groupOnes(hashes: List<KnotHash>) {
+fun groupOnes(hashes: List<KnotHash>): Map<Pair<Int, Int>, Int> {
     var groupIndex = 0
     var groups = mutableMapOf<Pair<Int, Int>, Int>()
     // for each row
     hashes.forEachIndexed { row, hash ->
         // for each column
-        (0..hash.size-1).forEach { col ->
+        (0..(hash.size-1)).forEach { col ->
             // if this square is used
             if (hash.bitAt(col).falseIfNull()) {
                 // is the west and/or north neighbor grouped?
-                var westGroup = groups.get(Pair(row, col))
+                var westGroup = groups.get(Pair(row, col-1))
                 var northGroup = groups.get(Pair(row-1, col))
                 when {
+                    // add to west group; merge north into west
                     westGroup != null && northGroup != null -> {
                         groups.put(Pair(row, col), westGroup)
                         groups.filterValues { it == northGroup} 
@@ -154,6 +169,7 @@ fun groupOnes(hashes: List<KnotHash>) {
             }
         }
     }
+    return groups.toMap()
 }
 
 fun main(args: Array<String>) {
@@ -166,13 +182,15 @@ fun main(args: Array<String>) {
       
     input.whenNotNullNorBlank { baseInput ->
         val knotHasher = KnotHasher()
-        //val usedBlocks = (0..127).map {
-        val usedBlocks = (0..127).map {
+        val hashes = (0..127).map {
             knotHasher.hash("%s-%d".format(baseInput, it))
-        }.map {
-            it.bitsSet()
-        }.sum()
-
+        }
+        
+        val usedBlocks = hashes.map { it.bitsSet() }.sum()
         println("$usedBlocks blocks used")
+
+        val groups = groupOnes(hashes)
+        val numGroups = groups.values.distinct().size
+        println("$numGroups regions")
     }
 }
