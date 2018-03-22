@@ -27,16 +27,29 @@ def parseInput(filename)
         .split(',')
         .map { |line| line.chomp }
         .map { |token|
-            if token.length == 2
-                name, a = token.chars
-                DanceMove.new(name, a)
-            elsif token.length == 4
-                name, a, _, b = token.chars
+            if m = token.match(/([a-z])([a-z0-9]+)(?:\/([a-z0-9]+))?/)
+                name = m.captures[0]
+                a = m.captures[1]
+                b = if m.length > 2 then m.captures[2] else nil end
                 DanceMove.new(name, a, b)
             else
-                raise "Unexpected input format #{token}"
+                puts "no match for #{token}"
             end
         }
+end
+
+def dance(programs, dance_moves)
+    dance_moves.each do |dm|
+        case dm.name
+            when "s"
+                programs = programs.slice(-dm.a..-1) + programs.slice(0..(-dm.a-1))    
+            when "x"
+                programs[dm.a], programs[dm.b] = programs[dm.b], programs[dm.a]
+            when "p"
+                programs.tr!("#{dm.a}#{dm.b}", "#{dm.b}#{dm.a}")
+        end
+    end
+    return programs
 end
 
 if __FILE__ == $0
@@ -44,19 +57,13 @@ if __FILE__ == $0
         puts "missing input file"
     else
         dance_moves = parseInput(ARGV[0])
-        puts dance_moves
+        dances = ARGV.length > 1 ? ARGV[1].to_i : 1
         programs = ("a".."p").to_a.join
-        puts programs
-        dance_moves.each do |dm|
-            print "#{dm} => "
-            case dm.name
-                when "s"
-                    programs = programs.slice(-dm.a..-1) + programs.slice(0..-dm.a)    
-                when "x", "p"
-                    programs[dm.a], programs[dm.b] = programs[dm.b], programs[dm.a]
-            end
-            puts programs
+        puts "start: #{programs}"
+        dances.times do |i|
+            programs = dance(programs, dance_moves)
+            print("#{i}/#{dances}\r") if i % 1000 == 0
         end
-        puts programs
+        puts "end: #{programs}"
     end
 end
