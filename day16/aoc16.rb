@@ -59,11 +59,23 @@ if __FILE__ == $0
         dance_moves = parseInput(ARGV[0])
         dances = ARGV.length > 1 ? ARGV[1].to_i : 1
         programs = ("a".."p").to_a.join
-        puts "start: #{programs}"
+        history = []
+        cycle_end = -1
         dances.times do |i|
+            #print("#{i}\r")
             programs = dance(programs, dance_moves)
-            print("#{i}/#{dances}\r") if i % 1000 == 0
+            puts programs
+            history.each do |h|
+                puts "\t#{h} == #{programs} => #{h==programs}"
+            end
+            if history.include?(programs)
+                cycle_end = i
+                break
+            else
+                history << programs
+            end
         end
-        puts "end: #{programs}"
+        puts("\tfound cycle at #{cycle_end}") if cycle_end >= 0
+        puts "\nend: #{history[dances % cycle_end]}"
     end
 end
