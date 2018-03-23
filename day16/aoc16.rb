@@ -38,7 +38,8 @@ def parseInput(filename)
         }
 end
 
-def dance(programs, dance_moves)
+def dance(programs_state, dance_moves)
+    programs = programs_state.clone
     dance_moves.each do |dm|
         case dm.name
             when "s"
@@ -62,18 +63,13 @@ if __FILE__ == $0
         history = []
         cycle_end = -1
         dances.times do |i|
-            #print("#{i}\r")
-            programs = dance(programs, dance_moves)
-            puts programs
-            history.each do |h|
-                puts "\t#{h} == #{programs} => #{h==programs}"
-            end
             if history.include?(programs)
                 cycle_end = i
                 break
             else
-                history << programs
+                history << programs.clone
             end
+            programs = dance(programs, dance_moves)
         end
         puts("\tfound cycle at #{cycle_end}") if cycle_end >= 0
         puts "\nend: #{history[dances % cycle_end]}"
