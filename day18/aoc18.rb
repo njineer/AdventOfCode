@@ -22,12 +22,21 @@ if __FILE__ == $0
         last_freq = nil
         instructions = File.readlines(infile).map { |line| line.split(" ") }
 
+        # if there is an arg and the arg is a register
+        #   get register content
+        # else return arg
+        get_reg_or_value = lambda { |v|
+            if v
+                val, is_int = v.to_i_if_i
+                val = if !is_int then registers[val] else val end
+            end
+        }
+
         index = 0
         while true
             instr, reg, arg = instructions[index]
             # if there is an arg, get the int or the register content
-            value, is_int = arg.to_i_if_i if arg
-            value = if !is_int then registers[value] else value end
+            value = get_reg_or_value.call(arg)
             # make sure this register is initialized
             registers[reg] = 0 if !registers.has_key? reg
             # process instructions
@@ -50,7 +59,8 @@ if __FILE__ == $0
             end
 
             # next instruction offset
-            if instr === "jgz" and registers[reg] != 0
+            cond = get_reg_or_value.call(reg)
+            if instr === "jgz" and cond != 0
                 index += value
             else
                 index += 1
