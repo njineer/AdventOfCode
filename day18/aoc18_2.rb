@@ -30,7 +30,7 @@ class Program
     end
 
     def is_dead?
-        [:block, :done].include? @status and @queue.empty?
+        @status === :block and @queue.empty?
     end
 end
 
@@ -95,11 +95,8 @@ def run(instructions, p0, p1, debug=false)
         # out of bounds -> done
         if active.index < 0 or active.index >= instructions.length
             puts "\tp#{active.id} done" if debug
-            active.status = :done
-            if inactive.is_inactive?
-                puts "single deadlock after out of bounds" if debug
-                break
-            end
+            active.status = :block
+            break if inactive.is_dead?
             active, inactive = inactive, active
         end
 
