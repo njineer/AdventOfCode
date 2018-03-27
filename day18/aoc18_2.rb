@@ -41,7 +41,8 @@ def run(instructions, p0, p1)
         cmd = instr[0].to_sym
         arg1, arg2 = instr.drop(1)
     
-        puts "#{cmd} #{arg1} #{arg2}" if active === p0
+        #puts "#{cmd} #{arg1} #{arg2}" if active === p0
+
         # process instructions
         case cmd
             when :snd 
@@ -57,6 +58,7 @@ def run(instructions, p0, p1)
                 active.registers[arg1.to_sym] %= active.reg_or_value(arg2)
             when :rcv
                 if active.queue.empty?
+                    break if inactive.is_inactive?
                     active.status = :block
                     active, inactive = inactive, active
                     next
@@ -77,11 +79,12 @@ def run(instructions, p0, p1)
         end
         if active.index < 0 or active.index >= instructions.length
             active.status = :done
+            break if inactive.is_inactive?
             active, inactive = inactive, active
         end
 
         break if active.is_inactive? and inactive.is_inactive?
-        watchdog += 1; break if watchdog > 100000
+        watchdog += 1; break if watchdog > 200000
     end
 end
 
@@ -92,6 +95,9 @@ if __FILE__ == $0
         instructions = File.readlines(ARGV[0]).map { |line| line.split(" ") }.freeze
         p0, p1 = Program.new(0), Program.new(1)
         run(instructions, p0, p1)
+        puts p0.status
+        puts p1.status
+        puts p1.sends
 
     end
 end
