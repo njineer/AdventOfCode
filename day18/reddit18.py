@@ -24,9 +24,8 @@ d = ds[pr] # current program's registers
 i = ind[0] # current program's instruction index
 ins = [0,0]
 while True:
-    if pr == 1:
-        print ' '.join(instr[i])
     ins[pr] += 1
+    print "p%d: %s" % (pr, " ".join(map(str, instr[i])))
     if instr[i][0]=="snd": # send
         if pr==1: # count how many times program 1 sends
             tot+=1
