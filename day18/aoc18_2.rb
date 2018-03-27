@@ -8,7 +8,7 @@ end
 
 class Program
     attr_reader :id
-    attr_accessor :registers, :sends, :queue, :index, :status, :history
+    attr_accessor :registers, :sends, :queue, :index, :status
 
     def initialize(id)
         @id = id
@@ -18,7 +18,6 @@ class Program
         @queue = Array.new
         @index = 0
         @status = :run
-        @history = 0
     end
 
     def reg_or_value(str) 
@@ -35,7 +34,6 @@ class Program
 end
 
 def run(instructions, p0, p1, debug=false)
-    watchdog = 0
     active, inactive = p0, p1
     while true
         break if active.is_dead? and inactive.is_dead?
@@ -50,32 +48,21 @@ def run(instructions, p0, p1, debug=false)
             when :snd 
                 inactive.queue << active.reg_or_value(arg1)
                 active.sends += 1
-                puts "\tsnd #{active.reg_or_value(arg1)}" if debug
             when :set 
-                print "\tregisters[#{arg1.to_sym}] (#{active.registers[arg1.to_sym]}) = #{active.reg_or_value(arg2)} => " if debug
                 active.registers[arg1.to_sym] = active.reg_or_value(arg2)
-                puts "#{active.registers[arg1.to_sym]}" if debug
             when :add
-                print "\tregisters[#{arg1.to_sym}] (#{active.registers[arg1.to_sym]}) += #{active.reg_or_value(arg2)} => " if debug
                 active.registers[arg1.to_sym] += active.reg_or_value(arg2)
-                puts "#{active.registers[arg1.to_sym]}" if debug
             when :mul
-                print "\tregisters[#{arg1.to_sym}] (#{active.registers[arg1.to_sym]}) *= #{active.reg_or_value(arg2)} => " if debug
                 active.registers[arg1.to_sym] *= active.reg_or_value(arg2)
-                puts "#{active.registers[arg1.to_sym]}" if debug
             when :mod
-                print "\tregisters[#{arg1.to_sym}] (#{active.registers[arg1.to_sym]}) %= #{active.reg_or_value(arg2)} => " if debug
                 active.registers[arg1.to_sym] %= active.reg_or_value(arg2)
-                puts "#{active.registers[arg1.to_sym]}" if debug
             when :rcv
                 if active.queue.empty?
-                    puts "\tqueue block" if debug
                     active.status = :block
                     active, inactive = inactive, active
                     next
                 else
                     active.registers[arg1.to_sym] = active.queue.shift
-                    puts "\trcv #{active.registers[arg1.to_sym]}" if debug
                     active.status = :run
                 end
             when :jgz
@@ -85,26 +72,16 @@ def run(instructions, p0, p1, debug=false)
     
         # next instruction offset
         if cmd === :jgz and active.reg_or_value(arg1) > 0
-            print "\tjump #{active.reg_or_value(arg2)} to " if debug
             active.index += active.reg_or_value(arg2)
-            puts "#{active.index} because #{active.reg_or_value(arg1)} != 0" if debug
         else
             active.index += 1
         end
 
         # out of bounds -> done
         if active.index < 0 or active.index >= instructions.length
-            puts "\tp#{active.id} done" if debug
             active.status = :block
             break if inactive.is_dead?
             active, inactive = inactive, active
-        end
-
-        active.history += 1
-        watchdog += 1; 
-        if watchdog > 200000
-            puts "WATCHDOG" if debug
-            break
         end
     end
 end
@@ -116,8 +93,6 @@ if __FILE__ == $0
         instructions = File.readlines(ARGV[0]).map { |line| line.split(" ") }.freeze
         p0, p1 = Program.new(0), Program.new(1)
         run(instructions, p0, p1)
-        puts "0 history: #{p0.history}"
-        puts "1 history: #{p1.history}"
         puts "0 sends: #{p0.sends}"
         puts "1 sends: #{p1.sends}"
     end

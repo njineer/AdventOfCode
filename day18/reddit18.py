@@ -54,6 +54,7 @@ while True:
             d = ds[pr]    # change registers
     elif instr[i][0]=="jgz":
         if get(instr[i][1]) > 0:
+            print "%d =? 0" % instr
             i+=get(instr[i][2])-1
     i+=1
     if not 0<=i<len(instr):
