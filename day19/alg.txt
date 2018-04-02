@@ -1,0 +1,31 @@
+for each line
+    for each non-whitespace character
+        if char is "|"
+            if there is a vertical route in this column
+                extend that route
+            else
+                start a new vertical route here
+        else if char is "+"
+            if there is a horizontal route
+                finish that route here
+            else
+                start a horizontal route here
+
+            if there is a vertical route
+                finish that vertical route here
+            else
+                start a new vertical route here
+        else if char is "-"
+            extend horizontal route
+        else if char is letter
+            add letter to horizontal route
+
+            if there is a vertical route in this column
+                add letter to the vertical route
+
+
+find start route
+while route has connection
+    collect letters on this route
+    route = route.connection
+
