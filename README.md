@@ -29,7 +29,3 @@ Day                                       | Part 1             | Part 2         
 [23](https://adventofcode.com/2017/day/23)  |                    |                    |
 [24](https://adventofcode.com/2017/day/24)  |                    |                    |
 [25](https://adventofcode.com/2017/day/25)  |                    |                    |
-~
-
-
-
