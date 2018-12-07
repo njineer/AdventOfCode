@@ -1,5 +1,5 @@
 # AdventOfCode
-Solutions to [Advent of Code](http://www.adventofcode.com) problems
+Solutions to [Advent of Code 2017](http://www.adventofcode.com/2017) problems
 
 
 Day                                       | Part 1             | Part 2             |
