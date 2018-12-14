@@ -6,14 +6,18 @@ history = set()
 freq = 0
 history.add(freq)
 
-for line in fileinput.input():
-    line_stripped = line.strip()
-    if not line_stripped:
-        continue
-    freq += int(line_stripped)
-    print(freq)
-    if freq in history:
-        print(freq)
-        break
-    else:
-        history.add(freq)
+inputs = [int(x.strip()) for x in fileinput.input() if x.strip()]
+
+iter_guard = 10000
+done = False
+
+while iter_guard and not done:
+    for val in inputs:
+        freq += val
+        if freq in history:
+            print(freq)
+            done = True
+            break
+        else:
+            history.add(freq)
+    iter_guard -=1
