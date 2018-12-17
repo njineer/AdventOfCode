@@ -1,8 +1,14 @@
-TARGET=day2
 CC=g++
 CPPFLAGS=-std=c++11
 
-$(TARGET): day2_1.o
+TARGET1=day2_1
+TARGET2=day2_2
+TARGETS=$(TARGET1) $(TARGET2)
+
+$(TARGET1): day2_2.o
+	$(CC) $(CPPFLAGS) $^ -o $@
+
+$(TARGET2): day2_1.o
 	$(CC) $(CPPFLAGS) $^ -o $@
 
 %.o: %.cpp
@@ -10,4 +16,4 @@ $(TARGET): day2_1.o
 
 .PHONY: clean
 clean:
-	@-rm $(TARGET) *.o
+	-@rm $(TARGETS) *.o 2>/dev/null || true
