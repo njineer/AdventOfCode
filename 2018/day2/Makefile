@@ -1,8 +1,8 @@
 CC=g++
 CPPFLAGS=-std=c++17
 
-TARGET1=day2_1
-TARGET2=day2_2
+TARGET1=part1
+TARGET2=part2
 TARGETS=$(TARGET1) $(TARGET2)
 
 
@@ -14,10 +14,10 @@ clean:
 	-@rm $(TARGETS) *.o 2>/dev/null || true
 
 run1: $(TARGET1)
-	cat d2.in | ./$(TARGET1)
+	cat input | ./$(TARGET1)
 
 run2: $(TARGET2)
-	cat d2.in | ./$(TARGET2)
+	cat input | ./$(TARGET2)
 
 $(TARGET1): $(TARGET1).o
 	$(CC) $(CPPFLAGS) $^ -o $@
