@@ -25,42 +25,47 @@ const regex InputParser::num_re("(-?\\d+)");
 const sregex_iterator InputParser::re_itr_end = sregex_iterator();
 
 
+struct Rectangle {
+    int id, left, top, width, height;
+
+    Rectangle(array<int, 5>& params) {
+        id     = params[0];
+        left   = params[1];
+        top    = params[2];
+        width  = params[3];
+        height = params[4];
+    }
+};
+
+
+
 int main (int argc, char** argv) {
 
-    vector<array<int, 5>> claims;
+    vector<Rectangle> claims;
     map<pair<int, int>, int> used_squares;
     InputParser parser;
 
     // extract numbers for each line into array
     for (string input; getline(cin, input);) {
         auto claim = parser.parse(input);
-        auto id     = claim[0];
-        auto left   = claim[1];
-        auto top    = claim[2];
-        auto width  = claim[3];
-        auto height = claim[4];
+        auto rectangle = Rectangle(claim);
         // update the use of each square in this rectangle
-        for (int x=left; x < left+width; x++) {
-            for (int y=top; y < top+height; y++) {
+        for (int x=rectangle.left; x < rectangle.left+rectangle.width; x++) {
+            for (int y=rectangle.top; y < rectangle.top+rectangle.height; y++) {
                 used_squares[make_pair(x,y)]++;
             }
         }
         // save the rectangle for later
-        claims.emplace_back(claim);
+        claims.emplace_back(rectangle);
     } 
     cout << count_if(used_squares.begin(), used_squares.end(), [](auto& sq){ return sq.second > 1; }) << endl;
 
     // for each rectangle
-    for (auto& claim: claims) {
-        auto id     = claim[0];
-        auto left   = claim[1];
-        auto top    = claim[2];
-        auto width  = claim[3];
-        auto height = claim[4];
+    for (auto& rectangle: claims) {
         bool overlap = false;
         // check each square for overlap
-        for (int x=left; x < left+width; x++) {
-            for (int y=top; y < top+height; y++) {
+        for (int x=rectangle.left; x < rectangle.left+rectangle.width; x++) {
+            for (int y=rectangle.top; y < rectangle.top+rectangle.height; y++) {
                 if (used_squares[make_pair(x,y)] > 1) {
                     overlap = true;
                     // don't bother to keep looking
@@ -74,7 +79,7 @@ int main (int argc, char** argv) {
         }
         if (!overlap) {
             // this is the unique rectangle
-            cout << id << endl;
+            cout << rectangle.id << endl;
             break;
         }
     }
