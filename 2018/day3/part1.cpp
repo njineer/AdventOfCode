@@ -25,12 +25,14 @@ int main (int argc, char** argv) {
         auto top    = claim[2];
         auto width  = claim[3];
         auto height = claim[4];
+        // update the use of each square in this rectangle
         for (int x=left; x < left+width; x++) {
             for (int y=top; y < top+height; y++) {
-                used_squares[make_pair(x,y)] += 1;
+                used_squares[make_pair(x,y)]++;
             }
         }
     } 
+    // count the number of multi-use squares
     cout << count_if(used_squares.begin(), used_squares.end(), [](auto& sq){ return sq.second > 1; }) << endl;
 
     return 0;
