@@ -6,6 +6,7 @@
 #include <regex>
 #include <map>
 #include <stdexcept>
+#include <sstream>
 
 using namespace std;
 
@@ -37,7 +38,8 @@ struct Timestamp {
             }
         }
         if (i == 5) {
-            // status change (i.e. no Guard id in input)
+            // state change (i.e. no Guard id in input)
+            id = -1;
             smatch re_match;
             if (regex_match(input, re_match, state_re)) {
                 auto match_str = re_match.str(1);
@@ -47,20 +49,42 @@ struct Timestamp {
                     state = State::asleep;
                 } else {
                     // should be one of two options
-                    throw runtime_error("Bizarre regex error from input:" + input);
+                    //throw runtime_error("Bizarre regex error from input:" + input);
+                    cerr << ("Bizarre regex error from input:" + input) << endl;
                 }
             } else {
                 // malformed input
-                throw runtime_error("Missing expected status keyword: " + input);
+                //throw runtime_error("Missing expected state keyword: " + input);
+                cerr << ("Missing expected state keyword: " + input) << endl;
             }
         } else {
             // no state necessary (guard change)
             state = State::unknown;
         }
     }
+
+    string str() {
+        ostringstream ss;
+        ss << "<Timestamp("
+           << "year=" << year
+           << ", month=" << month
+           << ", day=" << day
+           << ", hour=" << hour
+           << ", minute=" << minute
+           << ", id=" << id
+           << ", state=";
+        switch(state) {
+            case State::awake: ss << "awake"; break;
+            case State::asleep: ss << "asleep"; break;
+            case State::unknown: 
+            default: ss << "unknown"; break;
+        }
+        ss << ")>";
+        return ss.str();
+    }
 };
 const regex Timestamp::num_re("(\\d+)");
-const regex Timestamp::state_re("^\\[.*\\](wakes|falls)$");
+const regex Timestamp::state_re("\\[.*\\]\\s*(wakes|falls)\\s+\\w+\\s*$");
 const sregex_iterator Timestamp::re_itr_end = sregex_iterator();
 
 
@@ -71,6 +95,7 @@ int main (int argc, char** argv) {
     // parse inputs into vector
     for (string input; getline(cin, input);) {
         timestamps.emplace_back(input);
+        cout << timestamps.back().str() << endl;
     } 
 
     return 0;
