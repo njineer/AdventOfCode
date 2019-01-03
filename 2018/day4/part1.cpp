@@ -1,12 +1,11 @@
 #include <iostream>
-#include <vector>
-#include <iterator>
 #include <string>
-#include <algorithm>
 #include <regex>
-#include <map>
-#include <stdexcept>
 #include <sstream>
+#include <tuple>
+#include <vector>
+#include <stdexcept>
+#include <algorithm>
 
 using namespace std;
 
@@ -63,7 +62,7 @@ struct Timestamp {
         }
     }
 
-    string str() {
+    auto str() const {
         ostringstream ss;
         ss << "<Timestamp("
            << "year=" << year
@@ -82,21 +81,32 @@ struct Timestamp {
         ss << ")>";
         return ss.str();
     }
+
+    auto tuple() const {
+        return tie(year, month, day, hour, minute, id, state);
+    }
+
+    friend bool operator< (const Timestamp& a, const Timestamp& b);
+
 };
 const regex Timestamp::num_re("(\\d+)");
 const regex Timestamp::state_re("\\[.*\\]\\s*(wakes|falls)\\s+\\w+\\s*$");
 const sregex_iterator Timestamp::re_itr_end = sregex_iterator();
 
 
+bool operator< (const Timestamp& a, const Timestamp& b) {
+    return a.tuple() < b.tuple();
+}
+
 
 int main (int argc, char** argv) {
 
     vector<Timestamp> timestamps;
-    // parse inputs into vector
+    // parse inputs into vector; sort
     for (string input; getline(cin, input);) {
         timestamps.emplace_back(input);
-        cout << timestamps.back().str() << endl;
     } 
+    sort(timestamps.begin(), timestamps.end());
 
     return 0;
 }
