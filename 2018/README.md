@@ -4,10 +4,10 @@ Solutions to [Advent of Code](http://www.adventofcode.com) problems
 
 Day                                         | Part 1             | Part 2             |
 ------------------------------------------- |--------------------|--------------------|
-[1](https://adventofcode.com/2017/day/1)    |                    |                    |
-[2](https://adventofcode.com/2017/day/2)    |                    |                    |
-[3](https://adventofcode.com/2017/day/3)    |                    |                    |
-[4](https://adventofcode.com/2017/day/4)    |                    |                    |
+[1](https://adventofcode.com/2017/day/1)    | :white_check_mark: | :white_check_mark: |
+[2](https://adventofcode.com/2017/day/2)    | :white_check_mark: | :white_check_mark: |
+[3](https://adventofcode.com/2017/day/3)    | :white_check_mark: | :white_check_mark: |
+[4](https://adventofcode.com/2017/day/4)    | :white_check_mark: | :white_check_mark: |
 [5](https://adventofcode.com/2017/day/5)    |                    |                    |
 [6](https://adventofcode.com/2017/day/6)    |                    |                    |
 [7](https://adventofcode.com/2017/day/7)    |                    |                    |
