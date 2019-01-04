@@ -126,16 +126,13 @@ int main (int argc, char** argv) {
     for (auto& ts : timestamps) {
         if (ts.id != -1) {
             cur_guard = ts.id;
-            cout << "new guard [" << ts.id << "] @ " << ts.minute << endl;
         } else {
             if (ts.state == State::asleep) {
                 sleep_start = ts.minute;
-                cout << "asleep @ " << sleep_start << endl;
             } else if (ts.state == State::awake) {
                 for (int i=sleep_start; i < ts.minute; ++i) {
                     guard_sleep_counts[cur_guard][i]++;
                 }
-                cout << "awake; slept from " << sleep_start << " - " << ts.minute << endl;
             }
         }
     }
@@ -149,18 +146,12 @@ int main (int argc, char** argv) {
             sleepiest_guard = guard.first;
         }
     }
-
     cout << "sleepiest guard: " << sleepiest_guard << endl;
-
-    for (int i=0; i<guard_sleep_counts[sleepiest_guard].size(); ++i) {
-        cout << i << " : " << guard_sleep_counts[sleepiest_guard][i] << endl;
-    }
 
     auto sleepiest_minute = distance(
             guard_sleep_counts[sleepiest_guard].begin(), 
             max_element(guard_sleep_counts[sleepiest_guard].begin(),
                         guard_sleep_counts[sleepiest_guard].end()));
-
     cout << "sleepiest minute: " << sleepiest_minute << endl;
 
     cout << sleepiest_guard * sleepiest_minute << endl;
