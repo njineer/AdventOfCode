@@ -4,8 +4,12 @@
 #include <sstream>
 #include <tuple>
 #include <vector>
+#include <map>
+#include <array>
 #include <stdexcept>
 #include <algorithm>
+#include <numeric>
+#include <iterator>
 
 using namespace std;
 
@@ -87,26 +91,79 @@ struct Timestamp {
     }
 
     friend bool operator< (const Timestamp& a, const Timestamp& b);
+    friend bool operator== (const Timestamp& a, const Timestamp& b);
 
 };
 const regex Timestamp::num_re("(\\d+)");
 const regex Timestamp::state_re("\\[.*\\]\\s*(wakes|falls)\\s+\\w+\\s*$");
 const sregex_iterator Timestamp::re_itr_end = sregex_iterator();
 
-
+//
+// Timestamp operators
+//
 bool operator< (const Timestamp& a, const Timestamp& b) {
     return a.tuple() < b.tuple();
+}
+
+bool operator== (const Timestamp& a, const Timestamp& b) {
+    return a.tuple() == b.tuple();
 }
 
 
 int main (int argc, char** argv) {
 
-    vector<Timestamp> timestamps;
     // parse inputs into vector; sort
+    vector<Timestamp> timestamps;
     for (string input; getline(cin, input);) {
         timestamps.emplace_back(input);
     } 
     sort(timestamps.begin(), timestamps.end());
 
+    map<int, array<int, 60>> guard_sleep_counts;
+
+    int cur_guard = -1;
+    int sleep_start = -1;
+    for (auto& ts : timestamps) {
+        if (ts.id != -1) {
+            cur_guard = ts.id;
+            cout << "new guard [" << ts.id << "] @ " << ts.minute << endl;
+        } else {
+            if (ts.state == State::asleep) {
+                sleep_start = ts.minute;
+                cout << "asleep @ " << sleep_start << endl;
+            } else if (ts.state == State::awake) {
+                for (int i=sleep_start; i < ts.minute; ++i) {
+                    guard_sleep_counts[cur_guard][i]++;
+                }
+                cout << "awake; slept from " << sleep_start << " - " << ts.minute << endl;
+            }
+        }
+    }
+
+    auto sleepiest_guard = -1;
+    auto max_minutes_slept = -1;
+    for (auto& guard : guard_sleep_counts) {
+        auto minutes_slept = accumulate(guard.second.begin(), guard.second.end(), 0);
+        if (minutes_slept > max_minutes_slept) {
+            max_minutes_slept = minutes_slept;
+            sleepiest_guard = guard.first;
+        }
+    }
+
+    cout << "sleepiest guard: " << sleepiest_guard << endl;
+
+    for (int i=0; i<guard_sleep_counts[sleepiest_guard].size(); ++i) {
+        cout << i << " : " << guard_sleep_counts[sleepiest_guard][i] << endl;
+    }
+
+    auto sleepiest_minute = distance(
+            guard_sleep_counts[sleepiest_guard].begin(), 
+            max_element(guard_sleep_counts[sleepiest_guard].begin(),
+                        guard_sleep_counts[sleepiest_guard].end()));
+
+    cout << "sleepiest minute: " << sleepiest_minute << endl;
+
+    cout << sleepiest_guard * sleepiest_minute << endl;
+    
     return 0;
 }
