@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <vector>
 #include <iterator>
+#include <map>
+#include <climits>
 
 using namespace std;
 
@@ -60,7 +62,23 @@ int main (int argc, char** argv) {
     getline(cin, input);
     rtrim(input);
 
-    cout << react(input) << " units remaining." << endl;
+    map<char, int> removal_results;
+    transform(input.begin(), input.end(), inserter(removal_results, removal_results.begin()),
+              [](const char& c){ return make_pair(toupper(c), INT_MAX); });
+
+    for (auto& chr : removal_results) {
+        string chr_removed;
+        remove_copy_if(input.begin(), input.end(), back_inserter(chr_removed),
+                       [chr](const char& c){ return toupper(c) == chr.first; });
+        chr.second = react(chr_removed);
+    }
+
+    auto min_itr = min_element(removal_results.begin(), removal_results.end(),
+        [](const auto& p1, const auto& p2){ return p1.second < p2.second; });
+
+    cout << "min: " << min_itr->first 
+         << " leaves " << min_itr->second 
+         << " units remaining." << endl;
     
     return 0;
 }
