@@ -6,7 +6,6 @@
 #include <sstream>
 #include <climits>
 #include <map>
-#include <iterator>
 #include <set>
 
 using namespace std;
@@ -45,10 +44,6 @@ int manhattan(const Point& p1, const Point& p2) {
     return abs(p1.x-p2.x) + abs(p1.y-p2.y);
 }
 
-int manhattan(const Point& p1, const int x, const int y) {
-    return abs(p1.x-x) + abs(p1.y-y);
-}
-
 int main (int argc, char** argv) {
     const regex num_re("(\\d+)");
     const sregex_iterator re_itr_end = sregex_iterator();
@@ -85,7 +80,7 @@ int main (int argc, char** argv) {
     for (int y=min_y; y <= max_y; y++) {
         for (int x=min_x; x <= max_x; x++) {
             auto xy_point = Point(x,y);
-            // get the minimum distance from each Point
+            // get the distance from each Point
             transform(points.begin(), points.end(), distances.begin(),
                       [&xy_point](const Point& p){ return manhattan(p, xy_point); });
             auto min_dist = *min_element(distances.begin(), distances.end());
