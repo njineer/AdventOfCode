@@ -67,7 +67,6 @@ int main (int argc, char** argv) {
     }
 
     vector<pair<int, char>> wq;
-    wq.reserve(60);
     while(!q.empty() || !wq.empty()) {
 
         // while there are workers and work to be done
@@ -76,42 +75,45 @@ int main (int argc, char** argv) {
             q.pop();
             cout << "wq-ing " << cur << " with " << (STEP_TIME+cur-'A'+1) << endl;
             // assign to worker (with time to completion)
-            heap_push(wq, make_pair(STEP_TIME + cur - 'A' + 1, cur)); // negative for min heap?
+            heap_push(wq, make_pair(-(STEP_TIME + cur - 'A' + 1), cur));
         }
 
-        // clear out the done/zero-time-remaining steps
-        auto cur = heap_pop(wq);
-        while(cur.first <= 0) {
-            // for each dependency of this step
-            for (auto& dep : deps[cur.second]) {
-                // remove this step from its prereq list
-                prereqs[dep].erase(cur.second);
-                // if this was the last prereq, enqueue
-                if (prereqs[dep].empty()) {
-                    q.push(dep);
+
+        while(!wq.empty()) {
+            auto cur = heap_pop(wq);
+            if (cur.first <= 0) {
+                // for each dependency of this step
+                for (auto& dep : deps[cur.second]) {
+                    // remove this step from its prereq list
+                    prereqs[dep].erase(cur.second);
+                    // if this was the last prereq, enqueue
+                    if (prereqs[dep].empty()) {
+                        q.push(dep);
+                        cout << "\tq-ing " << dep << endl;
+                    }
                 }
+                // track processing order
+                cout << "\tdone with " << cur.second << endl;
+                done.push_back(cur.second);
+            } else {
+                // for each dependency of this step
+                for (auto& dep : deps[cur.second]) {
+                    // remove this step from its prereq list
+                    prereqs[dep].erase(cur.second);
+                    // if this was the last prereq, enqueue
+                    if (prereqs[dep].empty()) {
+                        q.push(dep);
+                        cout << "\tq-ing " << dep << endl;
+                    }
+                }
+                // move time up to when the next step is done
+                for_each(wq.begin(), wq.end(), [cur](auto& step){step.first += cur.first;});
+                // track processing order
+                done.push_back(cur.second);
+                cout << "done with " << cur.second << ", adjusting time by " << cur.first << endl;
+                break;
             }
-            // track processing order
-            cout << "\talready done with " << cur.second << endl;
-            done.push_back(cur.second);
-            cur = heap_pop(wq);
         }
-
-        // for each dependency of the nearest-to-completion step
-        for (auto& dep : deps[cur.second]) {
-            // remove this step from prereq list
-            prereqs[dep].erase(cur.second);
-            // if this was the last prereq, enqueue
-            if (prereqs[dep].empty()) {
-                q.push(dep);
-                cout << "\tq-ing " << dep << endl;
-            }
-        }
-        done.push_back(cur.second);
-        cout << "done with " << cur.second << endl;
-        // move time up to when the next step is done
-        for_each(wq.begin(), wq.end(), [&cur](auto& step){step.first -= cur.first;});
-        cout << "wq.size=" << wq.size() << ", q.size=" << q.size() << endl;
     }
 
     for_each(done.begin(), done.end(), [](const auto& chr){ cout << chr; });
