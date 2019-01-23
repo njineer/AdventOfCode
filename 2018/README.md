@@ -8,9 +8,9 @@ Day                                         | Part 1             | Part 2       
 [2](https://adventofcode.com/2017/day/2)    | :white_check_mark: | :white_check_mark: |
 [3](https://adventofcode.com/2017/day/3)    | :white_check_mark: | :white_check_mark: |
 [4](https://adventofcode.com/2017/day/4)    | :white_check_mark: | :white_check_mark: |
-[5](https://adventofcode.com/2017/day/5)    |                    |                    |
-[6](https://adventofcode.com/2017/day/6)    |                    |                    |
-[7](https://adventofcode.com/2017/day/7)    |                    |                    |
+[5](https://adventofcode.com/2017/day/5)    | :white_check_mark: | :white_check_mark: |
+[6](https://adventofcode.com/2017/day/6)    | :white_check_mark: | :white_check_mark: |
+[7](https://adventofcode.com/2017/day/7)    | :white_check_mark: | :white_check_mark: |
 [8](https://adventofcode.com/2017/day/8)    |                    |                    |
 [9](https://adventofcode.com/2017/day/9)    |                    |                    |
 [10](https://adventofcode.com/2017/day/10)  |                    |                    |
