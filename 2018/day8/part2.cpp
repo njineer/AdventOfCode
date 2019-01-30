@@ -1,58 +1,48 @@
 #include <iostream>
-#include <vector>
-#include <iterator>
 #include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
+#include <vector>
+#include <numeric>
 
 using namespace std;
 
-int main (int argc, char** argv) {
+int parse(istream& is, int level=0) {
+    int child_count, md_count, md, md_sum=0;
+    vector<int> children;
+    vector<int> metadata;
 
-    vector<string> ids;
+    // read counts for this node
+    is >> child_count >> md_count;
 
-    // read and store each non-empty line
-    for (string input; getline(cin, input);) {
-        if (any_of(input.begin(), input.end(), [](auto& chr){return !isspace(chr);}))
-            ids.emplace_back(input);    
+    // recursively accumulate metadata sum for each child
+    for (int i=0; i < child_count; i++) {
+        children.push_back(parse(is, level+1));
+    } 
+
+    // parse metadata values
+    for (int i=0; i < md_count; i++) {
+        is >> md;
+        metadata.push_back(md);
     }
 
-    int diff_idx = -1;
-    auto itr1 = ids.begin();
-    auto itr2 = next(itr1);
-    auto end = ids.end();
-
-    // compare each unique pair of words; find the two with a single char difference
-    for (; itr1 != end; ++itr1) {
-        for (itr2 = next(itr1); itr2 != end; ++itr2) {
-            diff_idx = -1;
-            for (int k=0; k < itr1->size(); k++) {
-                if (itr1->at(k) != itr2->at(k)) {
-                    if (diff_idx >= 0) {
-                        // quit if we already found a diff
-                        diff_idx = -1;
-                        break;
-                    }
-                    else
-                        // track the index of the diff
-                        diff_idx = k;
-                }
-            }
-            if (diff_idx >= 0) {
-                // found the index of the single diff
-                cout << diff_idx << endl;
-                break;
+    // if this node has no children, sum the metadata values
+    if (children.empty()) {
+        md_sum += accumulate(metadata.begin(), metadata.end(), 0);
+    } 
+    else {
+        // use the metadata values as indices into this node's childnren
+        for (auto idx : metadata) {
+            if (idx <= children.size()) {
+                md_sum += children[idx-1];
             }
         }
-        if (diff_idx >= 0)
-            // propagate the early exit
-            break;
     }
-
-    // print the matching characters of the two single-difference-words
-    cout << itr1->substr(0, diff_idx) << itr1->substr(diff_idx+1) << endl;
-
-    return 0;
+   
+    // return total/recursive metadata sum for this node
+    return md_sum;
 }
 
+int main (int argc, char** argv) {
+    //cout << endl << "metadata total: " << parse(cin) << endl;
+    cout << parse(cin) << endl;
+    return 0;
+}
