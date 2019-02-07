@@ -41,35 +41,29 @@ int main (int argc, char** argv) {
 
     cout << "players: " << num_players << endl << "last marble: " << last_marble << endl;
 
-    vector<int> scores(num_players+1, 0);
+    vector<int64_t> scores(num_players+1, 0);
     list<int> marbles;
     marbles.push_back(0);
     auto cur = marbles.begin();
-    for (int m=1; m <= last_marble; m++) {
-        cout << "player " << m % (num_players+1) << " places marble " << m;
+    for (int m=1, p=0; m <= last_marble; m++, p=(p+1)%num_players) {
         if (m % 23) {
             forward(marbles, cur); 
             if (cur == marbles.begin()) {
-                cout << " at end";
                 marbles.push_back(m);
                 cur = --marbles.end();
             } else {
-                cout << " before " << *cur;
                 cur = marbles.insert(cur, m);
             }
         } else {
             reverse(marbles, cur);
-            scores[m % (num_players+1)] += m + *cur;
+            scores[p+1] += m + *cur;
             cur = marbles.erase(cur);
             if (cur == marbles.end()) {
                 cur = marbles.begin();
             }
         }
-        cout << "; cur = " << *cur << endl;
     }
 
-    cout << "done." << endl;
     cout << "max score: " << (*max_element(scores.begin(), scores.end())) << endl;
-
     return 0;
 }
