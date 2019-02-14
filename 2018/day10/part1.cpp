@@ -40,7 +40,7 @@ struct Point {
 bool px_cmp (const Point& p1, const Point& p2) { return p1.px < p2.px; };
 bool py_cmp (const Point& p1, const Point& p2) { return p1.py < p2.py; };
 
-// a highly inefficient means of drawing the board
+// a highly inefficient means of drawing the points
 //      ...but it runs very infrequently (assuming low MSG_HEIGHT variance)
 void draw(const vector<Point>& points) {
     auto min_x = min_element(points.begin(), points.end(), px_cmp)->px;
