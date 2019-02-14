@@ -9,7 +9,7 @@
 
 #define MSG_HEIGHT_L 5
 #define MSG_HEIGHT_H 10
-#define TIME_LIMIT 50000
+#define TIME_LIMIT 25000
 
 using namespace std;
 
@@ -55,7 +55,7 @@ void draw(const vector<Point>& points) {
         sort(row.begin(), row.end(), [](const auto& p1, const auto& p2) { return p1.px < p2.px; });
         auto prev_itr = row.begin();
         for (auto x=min_x; x <= max_x; x++) {
-           auto itr = find_if(row.begin(), row.end(), [x](const auto& p){ return p.px == x; });
+           auto itr = find_if(prev_itr, row.end(), [x](const auto& p){ return p.px == x; });
            if (itr != row.end()) {
                prev_itr = itr;
                cout << "#";
