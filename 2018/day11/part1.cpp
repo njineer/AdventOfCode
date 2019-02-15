@@ -24,7 +24,6 @@ inline int z(int x, int y, int w) {
 }
 
 int main (int argc, char** argv) {
-
     string input; 
     getline(cin, input);
     int serial = stoi(input);
@@ -37,10 +36,10 @@ int main (int argc, char** argv) {
         }
     }
 
-    // naively calculate fuel for all 3x3 squares
-    map<pair<int, int>, int> grid_3x3;
     int max_fuel = INT_MIN;
     pair<int, int> max_fuel_ul = make_pair(0,0);
+
+    // naively calculate fuel for all 3x3 squares; track max
     for (int x=1; x < RANGE-2; x++) {
         for (int y=1; y < RANGE-2; y++) {
             auto xy_fuel = 
