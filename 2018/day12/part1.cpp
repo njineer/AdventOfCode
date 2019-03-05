@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cassert>
 #include <map>
-#include <set>
+#include <unordered_set>
 #include <iterator>
 #include <numeric>
 
@@ -14,16 +14,15 @@ using namespace std;
 
 class Pots {
     private:
-        set<int> plants;
-        set<unsigned int> rules;
+        unordered_set<int> plants;
+        unordered_set<unsigned int> rules;
 
         inline bool get_plant(int i) {
-            auto itr = plants.find(i);
-            return itr != plants.end();
+            return plants.count(i) != 0;
         }
 
         inline bool plant_next_gen(unsigned int pattern) {
-            return rules.find(pattern) != rules.end();
+            return rules.count(pattern) != 0;
         }
 
         unsigned int get_pattern(int center) {
@@ -57,10 +56,10 @@ class Pots {
         }
 
         void update() {
-            auto leftmost_plant = *plants.begin();
+            auto leftmost_plant = *min_element(plants.begin(), plants.end());
+            auto rightmost_plant = *max_element(plants.begin(), plants.end());
             auto cur_pot = get_pattern(leftmost_plant - 3);
-            //cout << "starting @ " << leftmost_plant << endl;
-            for(int i=leftmost_plant-2; i < *plants.rbegin()+2; i++) {
+            for(int i=leftmost_plant-2; i < rightmost_plant+2; i++) {
                 cur_pot = (cur_pot << 1 | get_plant(i+2)) & 0x1f;
                 if (plant_next_gen(cur_pot)) {
                     plants.insert(i);
@@ -75,6 +74,7 @@ class Pots {
             return accumulate(plants.begin(), plants.end(), 0);
         }
 
+        // for example
         void display() {
             for(int i=-3; i <= 35; i++) {
                 if (plants.count(i)) {
@@ -125,12 +125,8 @@ int main (int argc, char** argv) {
         }
     }
 
-    //cout << 0 << "\t";
-    // pots.display();
     for (int i=1; i <= GENERATIONS; i++) {
-        // cout << i << "\t";
         pots.update();         
-        // pots.display();
     }
 
     cout << pots.plant_sum() << endl;
