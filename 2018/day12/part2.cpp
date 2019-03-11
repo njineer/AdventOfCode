@@ -1,88 +1,191 @@
 #include <iostream>
 #include <cctype>
-#include <algorithm>
 #include <regex>
+#include <algorithm>
 #include <cassert>
-#include <sstream>
-#include <climits>
+#include <unordered_set>
+#include <unordered_map>
 #include <numeric>
+#include <tuple>
+#include <optional>
+#include <vector>
+
+// plant pattern should converge by this point
+#define GENERATIONS 200
+// Difference in plant sums between generations after convergence
+//      Need to print a few generations after a duplicate to confirm
+//      Input-dependent
+#define CONVERGED_DIFF 22
+
+#define TARGET_GENERATION 50000000000
 
 using namespace std;
 
-#define DISTANCE 10000
+class Pots {
+    private:
 
-// https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
-// trim from right end, in-place
-inline void rtrim(std::string &s) {
-    s.erase(
-        std::find_if(s.rbegin(), 
-                     s.rend(), 
-                     [](int ch) { return !std::isspace(ch); }).base(), 
-        s.end()
-    );
-}
+        using tuple4i = tuple<int, int, int, int>;
+        // indices of pots that currently contain plants
+        unordered_set<int> plants;
+        // patterns that result in a plant next generation
+        unordered_set<unsigned int> rules;
 
-struct Point {
-    int x, y;
+        // a cache of the pot layouts we've seen
+        unordered_map<size_t, tuple4i> history;
 
-    Point(int _x, int _y) : x(_x), y(_y) { }
-    
-    const string str() const {
-        ostringstream ss;
-        ss << "<Point(x=" << x << ", y=" << y << ")>";
-        return ss.str();
-    }
+        // is there a plant in this pot?
+        inline bool get_plant(int i) {
+            return plants.count(i) != 0;
+        }
+
+        // will there be a plant in this pot next generation?
+        inline bool plant_next_gen(unsigned int pattern) {
+            return rules.count(pattern) != 0;
+        }
+
+        // get the plant pattern/rule centered on a pot
+        //      i.e. LLCRR => [#.]
+        inline unsigned int get_pattern(int center) {
+            return get_plant(center-2) << 4 | 
+                   get_plant(center-1) << 3 | 
+                   get_plant(center)   << 2 | 
+                   get_plant(center+1) << 1 |
+                   get_plant(center+2);
+        }
+
+        // hash the current pots layout in lieu of storing the whole vector
+        //      std::hash<vector<bool>> is predefined
+        //      could use a std::string, but that seems less efficient
+        size_t hash(int leftmost_plant, int rightmost_plant) {
+            vector<bool> layout(rightmost_plant-leftmost_plant);
+            for(int i=leftmost_plant; i < rightmost_plant; i++) {
+                layout[i-leftmost_plant] = get_plant(i); 
+            }
+            return std::hash<vector<bool>>()(layout);
+        }
+
+    public: 
+        Pots() { }
+
+        // establish the initial pots/plants layout
+        void init(const string& s) {
+            for (auto i=0; i < s.size(); i++) {
+                if (s[i] == '#') {
+                    plants.insert(i);
+                }
+            }
+        }
+
+        // add a generational rule
+        //      i.e. LLCRR => [#.]
+        void add_rule(const string& pattern_str) {
+            unsigned int pattern = 0;
+            int i= pattern_str.size() - 1;
+            for(auto itr = pattern_str.begin(); itr != pattern_str.end(); itr++, i--) {
+                if (*itr == '#') {
+                    pattern |= 1 << i;
+                }
+            }
+            rules.insert(pattern);
+        }
+
+        // update the pots/plants layout based on current state and generational rules
+        tuple<size_t, int, int> update() {
+            // get the outermost plants
+            auto leftmost_plant = *std::min_element(plants.begin(), plants.end());
+            auto rightmost_plant = *std::max_element(plants.begin(), plants.end());
+
+
+            // current state to return
+            auto cur_layout = make_tuple(hash(leftmost_plant, rightmost_plant), 
+                                         leftmost_plant, 
+                                         rightmost_plant);
+
+            // starting at the left end, create the 5-pot pattern to check against
+            //     generational rules 
+            // shift in/out the next pot to the right until we hit the right end
+            auto cur_pot = get_pattern(leftmost_plant - 3);
+            for(int i=leftmost_plant-2; i < rightmost_plant+2; i++) {
+                cur_pot = (cur_pot << 1 | get_plant(i+2)) & 0x1f;
+                if (plant_next_gen(cur_pot)) {
+                    plants.insert(i);
+                }
+                else {
+                    plants.erase(i);
+                }
+            }
+            return cur_layout;
+        }
+
+        // return the current sum of plants
+        int plant_sum() {
+            return std::accumulate(plants.begin(), plants.end(), 0);
+        }
+
+        // cache the current plants/endpoints/sum/generation
+        optional<tuple4i> cache(size_t layout, int left, int right, int sum, int gen) {
+            auto itr = history.find(layout);
+            if(itr != history.end()) {
+                return itr->second;
+            }
+            else {
+                history[layout] = make_tuple(left, right, sum, gen);
+                return nullopt;
+            }
+        }
 };
-int manhattan(const Point& p1, const Point& p2) {
-    return abs(p1.x-p2.x) + abs(p1.y-p2.y);
-}
+
 
 int main (int argc, char** argv) {
-    const regex num_re("(\\d+)");
-    const sregex_iterator re_itr_end = sregex_iterator();
 
-    vector<Point> points;
-    int min_x, max_x, min_y, max_y;
-    min_x = min_y = INT_MAX;
-    max_x = max_y = INT_MIN;
+    Pots pots;
 
-    // read input into list of Points, track min/max x/y
-    for (string input; getline(cin, input);) {
-        if (all_of(input.begin(), input.end(), [](auto ch){ return isspace(ch); })) 
-            break;
-        auto re_itr = sregex_iterator(input.begin(), input.end(), num_re);
-        auto x = stoi((re_itr++)->str());
-        auto y = stoi((re_itr++)->str());
-        points.emplace_back(x,y);
-        assert(re_itr == re_itr_end);
+    const regex init_re("initial state:\\s+([#\\.]+)");
+    const regex growth_re("([#\\.]+)\\s+=>\\s+([#\\.])");
+    smatch match;
 
-        min_x = min(min_x, x);
-        min_y = min(min_y, y);
-        max_x = max(max_x, x);
-        max_y = max(max_y, y);
+    // set initial state of pots
+    string input;
+    getline(cin, input);
+    if (regex_match(input, match, init_re)) {
+        pots.init(match.str(1));
     } 
-    
-    cout << "min/max: (" << min_x << ", " << min_y << ")...(" << max_x << ", " << max_y << ")" << endl;
+    else {
+        cout << "expected initial state in first line, got '" << input << "'" << endl;
+        throw;
+    }
 
-    // shamelessly inspired by a python solution from 
-    //   https://www.reddit.com/r/adventofcode/comments/a3kr4r/2018_day_6_solutions/
-    vector<int> distances(points.size());
-    int area = 0;
+    // parse generational patterns
+    for (string input; getline(cin, input);) {
+        // skip blank lines
+        if (all_of(input.begin(), input.end(), [](auto ch){ return isspace(ch); })) 
+            continue;
 
-    // for each x,y in relevant space
-    for (int y=min_y; y <= max_y; y++) {
-        for (int x=min_x; x <= max_x; x++) {
-            auto xy_point = Point(x,y);
-            // get the distance from each Point
-            transform(points.begin(), points.end(), distances.begin(),
-                      [&xy_point](const Point& p){ return manhattan(p, xy_point); });
-
-            if (accumulate(distances.begin(), distances.end(), 0) < DISTANCE)
-                area++;
+        if (regex_match(input, match, growth_re)) {
+            if (match.str(2) == "#") {
+                pots.add_rule(match.str(1));
+            }
+        } 
+        else {
+            cout << "unexpected pattern: '" << input << "'" << endl;
+            throw;
         }
     }
-    
-    cout << "Central area: " << area << endl;
+
+    for (int i=1; i <= GENERATIONS; i++) {
+        auto [layout, cur_left, cur_right] = pots.update();
+        auto cur_sum = pots.plant_sum();
+        auto cached = pots.cache(layout, cur_left, cur_right, cur_sum, i);
+        if (cached.has_value()) {
+            auto [left, right, sum, gen] = cached.value();
+            cout << "Duplicate found: "
+                 << "{gen=" << i << ", sum=" << cur_sum << "} "
+                 << " matches {gen=" << gen << ", sum=" << sum << "}" << endl;
+            cout << cur_sum + (TARGET_GENERATION-i)*CONVERGED_DIFF << endl;
+            break;
+        }
+    }
+
     return 0;
 }
 
