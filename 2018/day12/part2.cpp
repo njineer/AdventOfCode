@@ -24,14 +24,14 @@ using namespace std;
 class Pots {
     private:
 
-        using tuple4i = tuple<int, int, int, int>;
+        using tuple2i = tuple<int, int>;
         // indices of pots that currently contain plants
         unordered_set<int> plants;
         // patterns that result in a plant next generation
         unordered_set<unsigned int> rules;
 
         // a cache of the pot layouts we've seen
-        unordered_map<size_t, tuple4i> history;
+        unordered_map<size_t, tuple2i> history;
 
         // is there a plant in this pot?
         inline bool get_plant(int i) {
@@ -90,16 +90,14 @@ class Pots {
         }
 
         // update the pots/plants layout based on current state and generational rules
-        tuple<size_t, int, int> update() {
+        size_t update() {
             // get the outermost plants
             auto leftmost_plant = *std::min_element(plants.begin(), plants.end());
             auto rightmost_plant = *std::max_element(plants.begin(), plants.end());
 
 
             // current state to return
-            auto cur_layout = make_tuple(hash(leftmost_plant, rightmost_plant), 
-                                         leftmost_plant, 
-                                         rightmost_plant);
+            auto cur_layout = hash(leftmost_plant, rightmost_plant);
 
             // starting at the left end, create the 5-pot pattern to check against
             //     generational rules 
@@ -123,13 +121,13 @@ class Pots {
         }
 
         // cache the current plants/endpoints/sum/generation
-        optional<tuple4i> cache(size_t layout, int left, int right, int sum, int gen) {
+        optional<tuple2i> cache(size_t layout, int sum, int gen) {
             auto itr = history.find(layout);
             if(itr != history.end()) {
                 return itr->second;
             }
             else {
-                history[layout] = make_tuple(left, right, sum, gen);
+                history[layout] = make_tuple(sum, gen);
                 return nullopt;
             }
         }
@@ -161,6 +159,7 @@ int main (int argc, char** argv) {
         if (all_of(input.begin(), input.end(), [](auto ch){ return isspace(ch); })) 
             continue;
 
+        // add a rule if it results in a plant next generation
         if (regex_match(input, match, growth_re)) {
             if (match.str(2) == "#") {
                 pots.add_rule(match.str(1));
@@ -172,15 +171,26 @@ int main (int argc, char** argv) {
         }
     }
 
+    // update each generation until we find a duplicate pots layout
     for (int i=1; i <= GENERATIONS; i++) {
-        auto [layout, cur_left, cur_right] = pots.update();
+        // get the new layout
+        auto layout = pots.update();
+        // ... and the sum of that layout
         auto cur_sum = pots.plant_sum();
-        auto cached = pots.cache(layout, cur_left, cur_right, cur_sum, i);
+        // update/check the cache for this layout
+        auto cached = pots.cache(layout, cur_sum, i);
+
+        // found a repeated pots layout
         if (cached.has_value()) {
-            auto [left, right, sum, gen] = cached.value();
+            auto [sum, gen] = cached.value();
             cout << "Duplicate found: "
                  << "{gen=" << i << ", sum=" << cur_sum << "} "
                  << " matches {gen=" << gen << ", sum=" << sum << "}" << endl;
+
+            // CONVERGED_DIFF was found by printing diffs between historical layouts;
+            //     It remains constant after a repeat.
+            // The TARGET_GENERATION's sum should be CONVERGED_DIFF multiplied by the
+            //     number of generations remaining between the current and TARGET_GENERATION
             cout << cur_sum + (TARGET_GENERATION-i)*CONVERGED_DIFF << endl;
             break;
         }
