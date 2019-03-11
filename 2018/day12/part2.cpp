@@ -12,8 +12,9 @@
 
 // plant pattern should converge by this point
 #define GENERATIONS 200
+
 // Difference in plant sums between generations after convergence
-//      Need to print a few generations after a duplicate to confirm
+//      Need to print a (few?) generation(s) after a duplicate to confirm
 //      Input-dependent
 #define CONVERGED_DIFF 22
 
@@ -23,8 +24,8 @@ using namespace std;
 
 class Pots {
     private:
-
         using tuple2i = tuple<int, int>;
+
         // indices of pots that currently contain plants
         unordered_set<int> plants;
         // patterns that result in a plant next generation
