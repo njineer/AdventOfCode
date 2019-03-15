@@ -14,6 +14,10 @@ using int_pair = pair<int, int>;
 
 class Tracks {
     private:
+
+        //=================================
+        //      Internal classes
+        //=================================
         enum class Direction {
             Up,
             Down,
@@ -47,16 +51,26 @@ class Tracks {
             }
         };
 
+        //=================================
+        //      Static members
+        //=================================
         const static string track_chars;
         const static string cart_chars;
         const static map<Tracks::Direction, map<char, Tracks::Direction>> next_dir;
         const static map<Tracks::Direction, array<Tracks::Direction, 3>> next_dir_intersection;
         static string dir_str(const Direction& dir);
 
+        //=================================
+        //      Containers, variables
+        //=================================
         map<int_pair, char> tracks;
         vector<Cart> carts;
-        size_t row_count, col_count, cart_count;
+        size_t row_count;
 
+        //=================================
+        //      Methods
+        //=================================
+        
         void add_cart(size_t row, size_t col, char direction) {
             Direction dir;
             switch (direction) {
@@ -67,11 +81,11 @@ class Tracks {
                 default: break;
             }
             carts.emplace_back(row, col, dir);
-            ++cart_count;
         }
 
+        // move a cart forward one track
         void tick_cart(Cart& cart) {
-            //cout << "tick cart: " << cart.str() << endl;
+            // update coordinates
             int_pair next_coord;
             switch (cart.dir) {
                 case Direction::Up:    next_coord = make_pair(--cart.row, cart.col); break;
@@ -80,7 +94,8 @@ class Tracks {
                 case Direction::Right: next_coord = make_pair(cart.row, ++cart.col); break;
                 default: break;
             }
-            
+           
+            // get the next track this cart will touch, and update its direction
             auto next_track = tracks.at(next_coord);
             Direction new_dir;
             if (next_track == '+') {
@@ -90,7 +105,9 @@ class Tracks {
             }
             cart.dir = new_dir;
         }
-        
+       
+        // check for collisions
+        //      i.e. >1 cart at the same coords
         optional<int_pair> collision() {
             set<int_pair> cart_coords;
             for (auto& cart : carts) {
@@ -103,18 +120,23 @@ class Tracks {
 
 
     public:
-        Tracks() : row_count(0), col_count(0)
+        Tracks() : row_count(0) 
         { } 
 
+        // parse a line from input and add a row to the tracks
         void add_row(const string& line) {
             for (size_t i=0; i < line.size(); ++i) {
                 auto chr = line[i];
+
+                // no track
                 if (isspace(chr)) {
                     continue;
                 }
+                // normal track
                 else if (track_chars.find(chr) != string::npos) {
                     tracks[make_pair(row_count, i)] = chr;
                 }
+                // cart
                 else if (cart_chars.find(chr) != string::npos) {
                     switch (chr) {
                         case '>': 
@@ -127,12 +149,13 @@ class Tracks {
                     }
                     add_cart(row_count, i, chr);
                 }
+                // unsupported character
                 else {
                     cerr << "Unrecognized char '" << chr << "' in input" << endl;
                 }
             }
+            // adjust dimensions
             ++row_count;
-            col_count = max(col_count, line.size());
         }
 
         optional<int_pair> tick() {
@@ -148,9 +171,9 @@ class Tracks {
             return nullopt;
         }
 
+        // stringify each cart info for displaying
         string info() {
             ostringstream ss;
-            ss << "Tracks: [" << row_count << " x " << col_count << "]" << endl;
             for (auto& cart : carts) {
                 ss << "\t" << cart.str() << endl;
             }
@@ -158,8 +181,17 @@ class Tracks {
         }
 
 };
+
+//=================================
+//      Static members
+//=================================
+
+// chars representing tracks
 const string Tracks::track_chars = "|-/\\+";
+// chars representing carts
 const string Tracks::cart_chars = "^v<>";
+
+// lookup new direction based on current direction and next track touched
 const map<Tracks::Direction, map<char, Tracks::Direction>> Tracks::next_dir = {
     { Direction::Up, {
         { '|' , Direction::Up },
@@ -183,6 +215,7 @@ const map<Tracks::Direction, map<char, Tracks::Direction>> Tracks::next_dir = {
     }}
 };
 
+// lookup new direction based on current direction and current intersection behavior
 const map<Tracks::Direction, array<Tracks::Direction, 3>> Tracks::next_dir_intersection = {
     { Tracks::Direction::Up, {
         Tracks::Direction::Left,
@@ -206,6 +239,7 @@ const map<Tracks::Direction, array<Tracks::Direction, 3>> Tracks::next_dir_inter
     }}
 };
 
+// stringify Direction enum for displaying
 string Tracks::dir_str(const Direction& dir) {
     string str;
     switch (dir) {
