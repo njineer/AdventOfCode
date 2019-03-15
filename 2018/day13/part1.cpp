@@ -175,7 +175,7 @@ class Tracks {
         string info() {
             ostringstream ss;
             for (auto& cart : carts) {
-                ss << "\t" << cart.str() << endl;
+                ss << cart.str() << endl;
             }
             return ss.str();
         }
