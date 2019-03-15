@@ -1,4 +1,5 @@
-CC=g++
+#CC=g++
+CC=clang++
 CPPFLAGS=-std=c++17
 
 TARGET1=part1
