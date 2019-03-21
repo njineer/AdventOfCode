@@ -27,13 +27,17 @@ int main (int argc, char** argv) {
     int elf1 = 0, elf2 = 1;
 
     for (int i=0; i < recipe_count + RECIPES_AFTER; i++) {
+        // combine recipes
         auto cur_sum = recipes[elf1] + recipes[elf2];
+
+        // add new recipes
         if (cur_sum > 9) {
             // recipes are never >9, ergo sum is never >18
             recipes.push_back(1);
         }
         recipes.push_back(cur_sum % 10);
 
+        // update each elf's current recipe
         elf1 = (elf1 + recipes[elf1] + 1) % recipes.size();
         elf2 = (elf2 + recipes[elf2] + 1) % recipes.size();
     }
