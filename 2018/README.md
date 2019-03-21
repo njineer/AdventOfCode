@@ -11,13 +11,13 @@ Day                                         | Part 1             | Part 2       
 [5](https://adventofcode.com/2017/day/5)    | :white_check_mark: | :white_check_mark: |
 [6](https://adventofcode.com/2017/day/6)    | :white_check_mark: | :white_check_mark: |
 [7](https://adventofcode.com/2017/day/7)    | :white_check_mark: | :white_check_mark: |
-[8](https://adventofcode.com/2017/day/8)    |                    |                    |
-[9](https://adventofcode.com/2017/day/9)    |                    |                    |
-[10](https://adventofcode.com/2017/day/10)  |                    |                    |
-[11](https://adventofcode.com/2017/day/11)  |                    |                    |
-[12](https://adventofcode.com/2017/day/12)  |                    |                    |
-[13](https://adventofcode.com/2017/day/13)  |                    |                    |
-[14](https://adventofcode.com/2017/day/14)  |                    |                    |
+[8](https://adventofcode.com/2017/day/8)    | :white_check_mark: | :white_check_mark: |
+[9](https://adventofcode.com/2017/day/9)    | :white_check_mark: | :white_check_mark: |
+[10](https://adventofcode.com/2017/day/10)  | :white_check_mark: | :white_check_mark: |
+[11](https://adventofcode.com/2017/day/11)  | :white_check_mark: | :white_check_mark: |
+[12](https://adventofcode.com/2017/day/12)  | :white_check_mark: | :white_check_mark: |
+[13](https://adventofcode.com/2017/day/13)  | :white_check_mark: | :white_check_mark: |
+[14](https://adventofcode.com/2017/day/14)  | :white_check_mark: | :white_check_mark: |
 [15](https://adventofcode.com/2017/day/15)  |                    |                    |
 [16](https://adventofcode.com/2017/day/16)  |                    |                    |
 [17](https://adventofcode.com/2017/day/17)  |                    |                    |
