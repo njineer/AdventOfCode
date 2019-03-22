@@ -24,6 +24,7 @@ struct Sample {
         after = move(_after);
     }
 
+    // display for debugging
     string str() {
         ostringstream ss;
         int a,b,c,d;
@@ -39,17 +40,6 @@ struct Sample {
 };
 
 class Instructions {
-    public:
-        enum class InstructionName {
-            addr, addi,
-            mulr, muli,
-            banr, bani,
-            borr, bori,
-            setr, seti,
-            gtir, gtri, gtrr,
-            eqir, eqri, eqrr
-        };
-
     private:
         static array4i_ptr addr(const array4i_ptr& before, const array4i_ptr& instr);
         static array4i_ptr addi(const array4i_ptr& before, const array4i_ptr& instr);
@@ -68,8 +58,7 @@ class Instructions {
         static array4i_ptr eqri(const array4i_ptr& before, const array4i_ptr& instr);
         static array4i_ptr eqrr(const array4i_ptr& before, const array4i_ptr& instr);
 
-        static const 
-            map<InstructionName, function<array4i_ptr(const array4i_ptr&, const array4i_ptr&)>> ops;
+        static const array<function<array4i_ptr(const array4i_ptr&, const array4i_ptr&)>, 16> ops;
 
     public:
         static int analyze(const vector<Sample>& samples);
@@ -188,32 +177,19 @@ array4i_ptr Instructions::eqrr(const array4i_ptr& before, const array4i_ptr& ins
     return make_unique<array4i>(regs);
 }
 
-const map<Instructions::InstructionName, function<array4i_ptr(const array4i_ptr&, const array4i_ptr&)>> 
-Instructions::ops {
-    { InstructionName::addr, addr },
-    { InstructionName::addi, addi },
-    { InstructionName::mulr, mulr },
-    { InstructionName::muli, muli },
-    { InstructionName::banr, banr },
-    { InstructionName::bani, bani },
-    { InstructionName::borr, borr },
-    { InstructionName::bori, bori },
-    { InstructionName::setr, setr },
-    { InstructionName::seti, seti },
-    { InstructionName::gtir, gtir },
-    { InstructionName::gtri, gtri },
-    { InstructionName::gtrr, gtrr },
-    { InstructionName::eqir, eqir },
-    { InstructionName::eqri, eqri },
-    { InstructionName::eqrr, eqrr }
+// collect each operator for easy looping
+const array<function<array4i_ptr(const array4i_ptr&, const array4i_ptr&)>, 16> 
+Instructions::ops { 
+    addr, addi, mulr, muli, banr, bani, borr, bori, setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr
 };
 
+// look at a set of samples, and count the number that match >3 operations
 int Instructions::analyze(const vector<Sample>& samples) {
     // for each sample
     return count_if(samples.begin(), samples.end(), [](auto& s) {
         // count the number of equivalent operations
         auto equivalents = count_if(ops.begin(), ops.end(), [&s](auto& op) {
-            auto result = op.second(s.before, s.instr);
+            auto result = op(s.before, s.instr);
             return equal(s.after->begin(), s.after->end(), result->begin());
         });
         return equivalents >= 3;
