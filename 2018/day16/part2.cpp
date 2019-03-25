@@ -52,6 +52,8 @@ class Instructions {
             eqir, eqri, eqrr
         };
 
+        static string name_str(const InstructionName& iname);
+
     private:
         static array4i_ptr addr(const array4i_ptr& before, const array4i_ptr& instr);
         static array4i_ptr addi(const array4i_ptr& before, const array4i_ptr& instr);
@@ -222,6 +224,31 @@ unordered_set<Instructions::InstructionName> Instructions::compare(const unique_
     return eq;
 }
 
+string Instructions::name_str(const InstructionName& iname) {
+    string name;
+    switch (iname) {
+        case InstructionName::addr: name = "addr"; break;
+        case InstructionName::addi: name = "addi"; break;
+        case InstructionName::mulr: name = "mulr"; break;
+        case InstructionName::muli: name = "muli"; break;
+        case InstructionName::banr: name = "banr"; break;
+        case InstructionName::bani: name = "bani"; break;
+        case InstructionName::borr: name = "borr"; break;
+        case InstructionName::bori: name = "bori"; break;
+        case InstructionName::setr: name = "setr"; break;
+        case InstructionName::seti: name = "seti"; break;
+        case InstructionName::gtir: name = "gtir"; break;
+        case InstructionName::gtri: name = "gtri"; break;
+        case InstructionName::gtrr: name = "gtrr"; break;
+        case InstructionName::eqir: name = "eqir"; break;
+        case InstructionName::eqri: name = "eqri"; break;
+        case InstructionName::eqrr: name = "eqrr"; break;
+        default: name="unknown"; break;
+    }
+    return name;
+};
+
+
 array4i_ptr parse_line(const string& s, const regex& re) {
     smatch match;
     auto re_eq_itr = sregex_iterator(s.begin(), s.end(), re);
@@ -293,33 +320,27 @@ int main (int argc, char** argv) {
         program.emplace_back(move(parse_line(input, num_re)));
     }
 
-    unordered_map<int, unordered_set<Instructions::InstructionName>> equivalents;
     unordered_map<int, Instructions::InstructionName> opcodes;
 
-    for (int i=0; i < samples.size(); i++) {
-        equivalents[i] = Instructions::compare(samples[i]);
+    // frequency of instructions
+    array<unordered_map<Instructions::InstructionName, int>, 16> match_counts;
+
+    for (auto& sample : samples) {
+        auto opcode = sample.get()->instr->at(0);
+
+        auto potential_matches = Instructions::compare(sample);
+        for (auto& pm : potential_matches) { 
+            match_counts[opcode][pm]++;
+        }
     }
 
-    while (opcodes.size() < 16) {
-        for (auto eq_itr = equivalents.begin(); eq_itr != equivalents.end();) {
-            auto &[i, eqs] = *eq_itr;
-            auto opcode = samples[i].get()->instr->at(0);
-            // only one match: opcode known
-            if (eqs.size() == 1 && !opcodes.count(opcode)) {
-                opcodes[opcode] = *eqs.begin();
-                eq_itr = equivalents.erase(eq_itr);
-            }
-            else {
-                for (auto m_itr=eqs.begin(); m_itr != eqs.end(); ++m_itr) {
-                    if (find_if(opcodes.begin(), opcodes.end(), [&m_itr](auto& op) {
-                        return op.second == *m_itr; }) != opcodes.end())
-                    {
-                    }
+    for (int i=0; i < match_counts.size(); i++) {
+        opcodes[i] = max_element(match_counts[i].begin(), match_counts[i].end(),
+            [](auto& p1, auto& p2) { return p1.second < p2.second; })->first;
+    }
 
-                }
-                ++eq_itr;
-            }
-        }
+    for (auto& op: opcodes) {
+        cout << op.first << " " << Instructions::name_str(op.second) << endl;
     }
 
     return 0;
