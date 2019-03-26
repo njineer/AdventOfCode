@@ -43,11 +43,8 @@ class Instructions {
             borr, bori,
             setr, seti,
             gtir, gtri, gtrr,
-            eqir, eqri, eqrr,
-            unknown
+            eqir, eqri, eqrr
         };
-
-        static string name_str(const InstructionName& iname);
 
     private:
         static array4i_ptr addr(const array4i_ptr& regs, const array4i_ptr& instr);
@@ -67,17 +64,15 @@ class Instructions {
         static array4i_ptr eqri(const array4i_ptr& regs, const array4i_ptr& instr);
         static array4i_ptr eqrr(const array4i_ptr& regs, const array4i_ptr& instr);
 
-        static const 
-            unordered_map<InstructionName, function<array4i_ptr(const array4i_ptr&, const array4i_ptr&)>> ops;
+        static const unordered_map<
+            InstructionName, function<array4i_ptr(const array4i_ptr&, const array4i_ptr&)>> ops;
 
     public:
-        static 
-            unordered_set<InstructionName> compare(const unique_ptr<Sample>& sample);
+        static unordered_set<InstructionName> compare(const unique_ptr<Sample>& sample);
 
-        static 
-            array4i_ptr exec_program(
-                const unordered_map<int, Instructions::InstructionName>& opcodes,
-                const vector<array4i_ptr>& instructions);
+        static array4i_ptr exec_program(
+            const unordered_map<int, Instructions::InstructionName>& opcodes,
+            const vector<array4i_ptr>& instructions);
 };
 
 // addr (add register) stores into register C the result of adding register A and register B.
@@ -224,30 +219,10 @@ unordered_set<Instructions::InstructionName> Instructions::compare(const unique_
     return eq;
 }
 
-string Instructions::name_str(const InstructionName& iname) {
-    string name;
-    switch (iname) {
-        case InstructionName::addr: name = "addr"; break;
-        case InstructionName::addi: name = "addi"; break;
-        case InstructionName::mulr: name = "mulr"; break;
-        case InstructionName::muli: name = "muli"; break;
-        case InstructionName::banr: name = "banr"; break;
-        case InstructionName::bani: name = "bani"; break;
-        case InstructionName::borr: name = "borr"; break;
-        case InstructionName::bori: name = "bori"; break;
-        case InstructionName::setr: name = "setr"; break;
-        case InstructionName::seti: name = "seti"; break;
-        case InstructionName::gtir: name = "gtir"; break;
-        case InstructionName::gtri: name = "gtri"; break;
-        case InstructionName::gtrr: name = "gtrr"; break;
-        case InstructionName::eqir: name = "eqir"; break;
-        case InstructionName::eqri: name = "eqri"; break;
-        case InstructionName::eqrr: name = "eqrr"; break;
-        default: name="unknown"; break;
-    }
-    return name;
-};
-
+// exec a list of instructions with the same set of registers
+//     I don't love throwing away and re-creating the array4i_ptr
+//         each loop, but the instruction functions are already
+//         written that way from part 1
 array4i_ptr Instructions::exec_program(
     const unordered_map<int, Instructions::InstructionName>& opcodes,
     const vector<array4i_ptr>& instructions)
@@ -257,7 +232,6 @@ array4i_ptr Instructions::exec_program(
 
     for (auto& instr : instructions) {
         auto op = opcodes.at(instr->at(0));
-        // cout << instr->at(0) << "\t" << name_str(op) << endl;
         regs = move(ops.at(op)(regs, instr));
     }
     return regs;
@@ -282,9 +256,7 @@ array4i_ptr parse_line(const string& s, const regex& re) {
 int main (int argc, char** argv) {
 
     const regex num_re("(\\d+)");
-
     vector<unique_ptr<Sample>> samples;
-
     int empty_lines = 0;
     int line = 0;
     array4i_ptr tb, ta, ti;
@@ -360,7 +332,6 @@ int main (int argc, char** argv) {
     }
 
     array4i_ptr regs = Instructions::exec_program(opcodes, program);
-
     cout << regs->at(0) << endl;
 
     return 0;
