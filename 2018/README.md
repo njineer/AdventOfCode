@@ -1,6 +1,8 @@
 # AdventOfCode
 Solutions to [Advent of Code](http://www.adventofcode.com) problems
 
+This year seemed very simulation-heavy in the back half, so I started being selective on what
+    seemed interesting enough to solve.
 
 Day                                         | Part 1             | Part 2             |
 ------------------------------------------- |--------------------|--------------------|
@@ -23,9 +25,9 @@ Day                                         | Part 1             | Part 2       
 [17](https://adventofcode.com/2017/day/17)  | :x:                | :x:                |
 [18](https://adventofcode.com/2017/day/18)  | :white_check_mark: | :white_check_mark: |
 [19](https://adventofcode.com/2017/day/19)  | :x:                | :x:                |
-[20](https://adventofcode.com/2017/day/20)  |                    |                    |
-[21](https://adventofcode.com/2017/day/21)  |                    |                    |
-[22](https://adventofcode.com/2017/day/22)  |                    |                    |
-[23](https://adventofcode.com/2017/day/23)  |                    |                    |
+[20](https://adventofcode.com/2017/day/20)  | :x:                | :x:                |
+[21](https://adventofcode.com/2017/day/21)  | :x:                | :x:                |
+[22](https://adventofcode.com/2017/day/22)  | :x:                | :x:                |
+[23](https://adventofcode.com/2017/day/23)  | :white_check_mark: |                    |
 [24](https://adventofcode.com/2017/day/24)  |                    |                    |
 [25](https://adventofcode.com/2017/day/25)  |                    |                    |
