@@ -26,8 +26,8 @@ int manhattan(const Nanobot& nb1, const Nanobot& nb2) {
 int main (int argc, char** argv) {
 
     const regex re("pos=<([+-]?\\d+),([+-]?\\d+),([+-]?\\d+)>,\\s+r=([+-]?\\d+)");
-
     vector<Nanobot> nanobots;
+
     for (string input; getline(cin, input); ) {
         smatch match;
         if (regex_match(input, match, re)) {
