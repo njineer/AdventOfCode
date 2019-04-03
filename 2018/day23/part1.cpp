@@ -18,9 +18,14 @@ struct Nanobot {
     }
 };
 
+int manhattan(const Nanobot& nb1, const Nanobot& nb2) {
+    return abs(nb1.x - nb2.x) + abs(nb1.y - nb2.y) + abs(nb1.z - nb2.z);
+}
+
+
 int main (int argc, char** argv) {
 
-    const regex re("pos=<(\\d+),(\\d+),(\\d+)>,\\s+r=(\\d+)");
+    const regex re("pos=<([+-]?\\d+),([+-]?\\d+),([+-]?\\d+)>,\\s+r=([+-]?\\d+)");
 
     vector<Nanobot> nanobots;
     for (string input; getline(cin, input); ) {
@@ -37,10 +42,13 @@ int main (int argc, char** argv) {
         }
     }
 
-    for (auto& nb : nanobots) {
-        cout << nb.str() << endl;
-    }
+    auto& strongest = *max_element(nanobots.begin(), nanobots.end(), 
+        [](const auto& nb1, const auto& nb2) { return nb1.r < nb2.r; });
 
+    auto in_range = count_if(nanobots.begin(), nanobots.end(), [&strongest](const auto& nb) {
+        return manhattan(nb, strongest) <= strongest.r; });
+
+    cout << in_range << endl;
     return 0;
 }
 
