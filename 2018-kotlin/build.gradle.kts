@@ -28,8 +28,6 @@ dependencies {
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-
-    implementation("info.picocli:picocli:4.0.1")
 }
 
 application {
