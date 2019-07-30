@@ -10,7 +10,8 @@ fun main(args: Array<String>) {
 
     val solvers = mapOf(
         1 to arrayOf(::day1_1, ::day1_2),
-        2 to arrayOf(::day2_1, ::day2_2)
+        2 to arrayOf(::day2_1, ::day2_2),
+        3 to arrayOf(::day3_1, ::day3_2)
     )
 
     if (args.size >= 2) {

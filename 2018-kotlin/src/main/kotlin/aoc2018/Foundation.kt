@@ -1,6 +1,7 @@
 package aoc2018.foundation
 
 import java.io.File
+import kotlin.text.Regex
 
 fun <R> String?.whenNotNullNorBlank(fn: (String) -> R): R? {
     return this?.let { receiver ->
@@ -33,3 +34,10 @@ fun parseInput(filename: String?, fn: (String) -> Unit) {
     }
 }
 
+
+fun parseInts(line: String): List<Int> {
+    return Regex("(-?\\d+)")
+        .findAll(line)
+        .map { it.value.toInt() }
+        .toList()
+}
