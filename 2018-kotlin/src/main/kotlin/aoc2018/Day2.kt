@@ -18,7 +18,7 @@ fun countTwosAndThrees(id: String): Pair<Boolean, Boolean> {
 // return the multiplied counts
 fun day2_1(filename: String?) {
     val counts = mutableMapOf(2 to 0, 3 to 0)
-    val updateCounts: (String) -> Unit = { 
+    parseInput(filename) {
         val (two, three) = countTwosAndThrees(it)
         if (two) {
             counts.put(2, counts.getValue(2) + 1)
@@ -27,15 +27,13 @@ fun day2_1(filename: String?) {
             counts.put(3, counts.getValue(3) + 1)
         }
     }
-    parseInput(filename, updateCounts)
 
     println(counts.getValue(2)*counts.getValue(3))
 }
 
 fun day2_2(filename: String?) {
     val inputs = mutableListOf<String>()
-    val append: (String) -> Unit = { inputs.add(it) }
-    parseInput(filename, append)
+    parseInput(filename) { inputs.add(it) }
 
     // compare each input
     inputs.forEachIndexed { i, s1 ->

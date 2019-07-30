@@ -3,22 +3,23 @@ package aoc2018.days
 import aoc2018.foundation.parseInput
 
 // convert each line of input to int and append to list
-fun getInput(filename: String?): MutableList<Int> {
+fun collectInput(filename: String?): MutableList<Int> {
     val inputs = mutableListOf<Int>()
-    val appendInt: (String) -> Unit = { inputs.add(it.toInt()) }
-    parseInput(filename, appendInt)
+    parseInput(filename) { 
+        inputs.add(it.toInt())
+    }
     return inputs
 }
 
 // sum the input list
 fun day1_1(filename: String?) {
-    println(getInput(filename).sum())
+    println(collectInput(filename).sum())
 }
 
 // accumulate the input list until we see a repeated sum
 fun day1_2(filename: String?) {
     val seen = mutableSetOf<Int>()
-    val inputs = getInput(filename)
+    val inputs = collectInput(filename)
     var sum = 0
 
     while (true) {
