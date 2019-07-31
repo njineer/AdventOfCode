@@ -23,7 +23,6 @@ fun main(args: Array<String>) {
             } else {
                 null
             }
-
             fn(input)
         } 
         ?: println("Day $day.$part not implemented.")
@@ -32,5 +31,4 @@ fun main(args: Array<String>) {
         usage()
         println(args[0])
     }
-
 }
