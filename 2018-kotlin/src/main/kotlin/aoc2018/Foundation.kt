@@ -3,6 +3,9 @@ package aoc2018.foundation
 import java.io.File
 import kotlin.text.Regex
 
+
+val numRegex = Regex("(-?\\d+)")
+
 fun <R> String?.whenNotNullNorBlank(fn: (String) -> R): R? {
     return this?.let { receiver ->
         if (receiver.isNotBlank()) {
@@ -36,8 +39,9 @@ fun parseInput(filename: String?, fn: (String) -> Unit) {
 
 
 fun parseInts(line: String): List<Int> {
-    return Regex("(-?\\d+)")
+    return numRegex
         .findAll(line)
         .map { it.value.toInt() }
         .toList()
 }
+
