@@ -12,7 +12,7 @@ class Timestamp (
         val hour: Int, 
         val min: Int, 
         _action: String
-) {
+): Comparable<Timestamp> {
     val action = when (_action) {
         "falls asleep" -> Action.SLEEP
         "wakes up" -> Action.WAKE
@@ -29,6 +29,18 @@ class Timestamp (
     override fun toString(): String {
         return "Timestamp( year=$year, month=$month, day=$day, hour=$hour, min=$min, action=$action, guard=$guard"
     }
+
+    override fun compareTo(other: Timestamp) = 
+        compareValuesBy(
+            this, 
+            other,
+            compareBy(nullsFirst(), Timestamp::year)
+                .thenBy(Timestamp::month)
+                .thenBy(Timestamp::day)
+                .thenBy(Timestamp::hour)
+                .thenBy(Timestamp::min),
+            { it }
+        )
 
     companion object {
         val regex = Regex("""(?x)
@@ -64,8 +76,7 @@ fun parseTimestamp(str: String): Timestamp? {
 fun parseSchedule(filename: String?): List<Timestamp> {
     val timestamps = mutableListOf<Timestamp>()
     parseInput(filename) { timestamps.add(parseTimestamp(it)!!) }
-    timestamps.sortBy { "${it.year}${it.month}${it.day}${it.hour}${it.min}" }
-    return timestamps.toList()
+    return timestamps.sorted()
 }
 
 fun day4_1(filename: String?) {
@@ -81,13 +92,12 @@ fun day4_1(filename: String?) {
             }
             Timestamp.Action.WAKE -> {
                 val curGuardSleep = guardSleep.getOrPut(curGuard!!) { mutableMapOf<Int, Int>() }
-                (sleepStart!! until ts.min).map { min ->
+                (sleepStart!! until ts.min).forEach { min ->
                     curGuardSleep[min] = curGuardSleep.getOrDefault(min, 0) + 1
                 }
             }
             Timestamp.Action.SLEEP -> sleepStart = ts.min
         }
-        println(ts)
     }
 
     val sleepiestGuard = guardSleep
@@ -100,15 +110,10 @@ fun day4_1(filename: String?) {
         ?.key
     
     if (sleepiestGuard != null && sleepiestMin != null) {
-        println(sleepiestGuard)
-        println(sleepiestMin)
         println(sleepiestGuard*sleepiestMin)
+    } else {
+        println("Failed to find sleepiest guard/minute.")
     }
-
-    guardSleep[sleepiestGuard]?.forEach { (min, count) ->
-        println("$min: $count")
-    }
-        
 }
 
 fun day4_2(filename: String?) {
