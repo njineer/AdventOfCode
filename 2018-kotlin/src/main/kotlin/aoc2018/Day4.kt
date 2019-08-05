@@ -30,17 +30,16 @@ class Timestamp (
         return "Timestamp( year=$year, month=$month, day=$day, hour=$hour, min=$min, action=$action, guard=$guard"
     }
 
-    override fun compareTo(other: Timestamp) = 
-        compareValuesBy(
-            this, 
-            other,
-            compareBy(nullsFirst(), Timestamp::year)
-                .thenBy(Timestamp::month)
-                .thenBy(Timestamp::day)
-                .thenBy(Timestamp::hour)
-                .thenBy(Timestamp::min),
-            { it }
-        )
+    override fun compareTo(other: Timestamp) = compareValuesBy(
+        this, 
+        other,
+        compareBy(nullsFirst(), Timestamp::year)
+            .thenBy(Timestamp::month)
+            .thenBy(Timestamp::day)
+            .thenBy(Timestamp::hour)
+            .thenBy(Timestamp::min),
+        { it }
+    )
 
     companion object {
         val regex = Regex("""(?x)
@@ -54,6 +53,7 @@ class Timestamp (
                 Guard\s+\#\d+\s+begins\s+shift)
         """)
     }
+
     enum class Action { SLEEP, WAKE, SHIFT } 
 }
 
@@ -73,18 +73,14 @@ fun parseTimestamp(str: String): Timestamp? {
 }
 
 
-fun parseSchedule(filename: String?): List<Timestamp> {
+fun parseSchedule(filename: String?): MutableMap<Int, MutableMap<Int, Int>> {
     val timestamps = mutableListOf<Timestamp>()
     parseInput(filename) { timestamps.add(parseTimestamp(it)!!) }
-    return timestamps.sorted()
-}
 
-fun day4_1(filename: String?) {
-    val timestamps = parseSchedule(filename)
     val guardSleep = mutableMapOf<Int, MutableMap<Int, Int>>()
     var curGuard: Int? = null
     var sleepStart: Int? = null
-    timestamps.forEach { ts ->
+    timestamps.sorted().forEach { ts ->
         when (ts.action) {
             Timestamp.Action.SHIFT -> {
                 curGuard = ts.guard
@@ -100,13 +96,19 @@ fun day4_1(filename: String?) {
         }
     }
 
+    return guardSleep
+}
+
+fun day4_1(filename: String?) {
+    val guardSleep = parseSchedule(filename)
+
     val sleepiestGuard = guardSleep
         .mapValues { (_, sleep) -> sleep.values.sum() }
-        .maxBy { (_, totalSleep) -> totalSleep }
+        .maxBy { it.value }
         ?.key
 
     val sleepiestMin = guardSleep[sleepiestGuard]
-        ?.maxBy { (_, count) -> count }
+        ?.maxBy { it.value }
         ?.key
     
     if (sleepiestGuard != null && sleepiestMin != null) {
@@ -117,5 +119,15 @@ fun day4_1(filename: String?) {
 }
 
 fun day4_2(filename: String?) {
+    val guardSleep = parseSchedule(filename)
+    val mostConsistent = guardSleep
+        .mapValues { (_, sleep) -> sleep.maxBy { it.value }!! }
+        .maxBy { (_, guardMax) -> guardMax.value }
+        ?.let { (guard, guardMax) -> 
+            guard * guardMax.key
+        }
 
+    mostConsistent?.let {
+        println(mostConsistent)
+    } ?: println("Failed to find most consistent guard/minute.")
 }
