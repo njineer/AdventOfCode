@@ -3,6 +3,7 @@ package aoc2018.days
 import kotlin.text.Regex
 
 import aoc2018.foundation.parseInput
+import aoc2018.foundation.mapInput
 import aoc2018.foundation.numRegex
 
 class Timestamp (
@@ -74,8 +75,7 @@ fun parseTimestamp(str: String): Timestamp? {
 
 
 fun parseSchedule(filename: String?): MutableMap<Int, MutableMap<Int, Int>> {
-    val timestamps = mutableListOf<Timestamp>()
-    parseInput(filename) { timestamps.add(parseTimestamp(it)!!) }
+    val timestamps = mapInput(filename) { parseTimestamp(it)!! }
 
     val guardSleep = mutableMapOf<Int, MutableMap<Int, Int>>()
     var curGuard: Int? = null

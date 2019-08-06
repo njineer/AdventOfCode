@@ -1,6 +1,7 @@
 package aoc2018.days
 
 import aoc2018.foundation.parseInput
+import aoc2018.foundation.collectInput
 
 // count the frequency of each char in id
 // return whether any char has a frequency of 2 or 3
@@ -32,8 +33,7 @@ fun day2_1(filename: String?) {
 }
 
 fun day2_2(filename: String?) {
-    val inputs = mutableListOf<String>()
-    parseInput(filename) { inputs.add(it) }
+    val inputs = collectInput(filename)
 
     // compare each input
     inputs.forEachIndexed { i, s1 ->

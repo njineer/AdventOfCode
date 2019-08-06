@@ -45,3 +45,19 @@ fun parseInts(line: String): List<Int> {
         .toList()
 }
 
+
+fun <R: Any> mapInput(filename: String?, transform: (String) -> R): List<R> {
+    val ml = mutableListOf<R>()
+    parseInput(filename) {
+        ml.add(transform(it))
+    }
+    return ml.toList()
+}
+
+fun collectInput(filename: String?): List<String> {
+    val ml = mutableListOf<String>()
+    parseInput(filename) {
+        ml.add(it)
+    }
+    return ml.toList()
+}
