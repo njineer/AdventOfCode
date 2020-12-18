@@ -61,3 +61,7 @@ fun collectInput(filename: String?): List<String> {
     }
     return ml.toList()
 }
+
+fun parseSingle(filename: String?): String {
+    return collectInput(filename).single()
+}

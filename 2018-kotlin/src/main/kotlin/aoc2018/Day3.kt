@@ -33,7 +33,7 @@ fun day3_1(filename: String?) {
 fun day3_2(filename: String?) {
     processGrid(filename)
 
-    val noOverlap = claims
+    val noOverlap = claims.asSequence()
         .filter claimFilter@{ claim ->
             for (x in claim.x until claim.x+claim.width) {
                 for (y in claim.y until claim.y+claim.height) {
